@@ -1,0 +1,104 @@
+.container {
+  max-width: 200px;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+
+}
+
+.container_inside {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+}
+
+.name {
+  margin-left: 10px;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.sex {
+  margin-left: 10px;
+  font-style: italic;
+  color: #666;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+}
+
+.section {
+  font-weight: 500;
+  min-width: 60px;
+  color: #333;
+}
+
+.text {
+  display: inline-block;
+  overflow-wrap: break-word;
+  white-space: normal;
+  line-height: 1.5;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-left: 8px !important;
+}
+
+.cardFooter
+{
+  display: flex;
+  align-items: center;
+  background-color: #D0E2BA;
+  padding:5px;
+  border-radius: 10px;
+}
+
+.avatar
+{
+  width: 50px !important;
+  height: 50px !important;
+}
+
+.cardAction
+{
+  display: flex;
+  justify-content: space-between;
+}
+
+.goToButton
+{
+  background-color: #5c9ad7 !important; 
+  color: #fff !important;
+  font-size: 11px !important;
+}
+.goToButton:hover
+{
+  background-color: #1976d2 !important
+}
+
+.removeButton
+{
+  background-color: #ef8159 !important;
+  color: #fff !important;
+  font-size: 11px !important;
+}
+
+.removeButton:hover
+{
+  background-color: #FF6C37 !important;
+}
+

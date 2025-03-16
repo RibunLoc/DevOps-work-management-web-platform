@@ -1,0 +1,228 @@
+config:
+  target: 'https://social-network-for-pet-lover.onrender.com'
+  phases:
+    - duration: 5
+      arrivalRate: 3
+    - duration: 5
+      arrivalRate: 3
+  processor: './test-function.js'
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+
+  - name: "Register a new user"
+    flow:
+      - function: "generateEmail"
+      - function: "generatePhoneNumber"
+      - post:
+          url: "/api/v1/register"
+          json:
+            email: "{{ email }}"
+            password: "testpassword"
+            firstName: "John"
+            lastName: "Doe"
+            phone: "{{ phoneNumber}}"
+            location: "New York"
+            avatar: "avatarUrl"
+
+
+  # - name: "Login a user"
+  #   flow:
+  #     - post:
+  #         url: "/api/v1/login"
+  #         json:
+  #           email: "{{ email }}"
+  #           password: "testpassword"
+
+  # - name: "Create a post"
+  #   flow:
+  #     - post:
+  #         url: "/api/v1/post/create"
+  #         json:
+  #           userId: "{{ userId }}"
+  #           title: "Test Post Title"
+  #           content: "This is a test post content."
+  #           imgUrl: "someImageUrl"
+
+  # - name: "Send a message"
+  #   flow:
+  #     - post:
+  #         url: "/api/v1/message/post"
+  #         json:
+  #           senderEmail: "{{ email }}"
+  #           recipentEmail: "{{ targetEmail }}"
+  #           content: "Hello, this is a test message."
+
+  # - name: "Get user info"
+  #   flow:
+  #     - get:
+  #         url: "/api/v1/user/info"
+  #         qs:
+  #           email: "{{ email }}"
+
+  # - name: "Get posts by user ID"
+  #   flow:
+  #     - get:
+  #         url: "/api/v1/post/getpostsbyuserid"
+  #         qs:
+  #           userAccessId: "{{ userId }}"
+  #           targetId: "{{ targetId}}"
+            
+
+  # - name: "Get recent messages"
+  #   flow:
+  #     - get:
+  #         url: "/api/v1/message/recent"
+  #         qs:
+  #           email: "{{ email }}"
+
+  # - name: "Create a comment on a post"
+  #   flow:
+  #     - post:
+  #         url: "/api/v1/comment/create"
+  #         json:
+  #           postId: "{{ postId }}"
+  #           userId: "{{ userId }}"
+  #           content: "Great post! Really enjoyed reading it."
+
+  # - name: "Edit a comment"
+  #   flow:
+  #     - post:
+  #         url: "/api/v1/comment/update"
+  #         json:
+  #           commentId: "{{ commentId }}"
+  #           contentComment: "Updated comment content."
+
+  # - name: "Like a post"
+  #   flow:
+  #     - post:
+  #         url: "/api/v1/like/likepost"
+  #         json:
+  #           userId: "{{ userId }}"
+  #           targetId: "{{ postId }}"
+  #           targetType: "comment"
+
+  # - name: "follow a user"
+  #   flow:
+  #     - post:
+  #         url: "/api/v1/follow/create"
+  #         json:
+  #           followerId: "{{ userId }}"
+  #           followingId: "{{ targetId }}"
+
+  # - name: "Update user avatar"
+  #   flow:
+  #     - post:
+  #         url: "/api/v1/user/updateAvatar"
+  #         json:
+  #           userId: "{{ userId }}"
+  #           imageUrl: "updatedAvatarUrl"
+
+  # - name: "Create a pet profile"
+  #   flow:
+  #     - post:
+  #         url: "/api/v1/pet/create"
+  #         json:
+  #           userId: "{{ userId }}"  # Replace with a dynamically generated userId
+  #           name: "Fluffy"
+  #           bio: "A very playful Golden Retriever who loves the outdoors."  # Pet's description
+  #           type: "Dog"  # Type of pet
+  #           breed: "Golden Retriever"  # Pet breed
+  #           profilePicture: "https://example.com/fluffy.jpg"  # URL to the pet's profile picture
+  #           sex: "Male"  # Gender of the pet
+  #           birthday: "2020-06-15"  # Birthdate of the pet
+  #           height: 60  # Height of the pet in cm
+  #           weight: 30  # Weight of the pet in kg
+
+  # - name: "Get user pet profiles"
+  #   flow:
+  #     - get:
+  #         url: "/api/v1/pet/getbyuserid"
+  #         qs:
+  #           userId: "{{ userId }}"
+
+  # - name: "Get user's favorite posts"
+  #   flow:
+  #     - get:
+  #         url: "/api/v1/post/favourited/getbyuserid"
+  #         qs:
+  #           userId: "{{ userId }}"
+
+  # - name: "Get notification updates"
+  #   flow:
+  #     - get:
+  #         url: "/api/v1/notification/get"
+  #         qs:
+  #           page: "1"
+  #           limit: "5"
+  #           postOwnerEmail: "{{email}}"
+
+  # - name: "Chatbot interaction"
+    # flow:
+    #   - post:
+    #       url: "/api/v1/chatbot"
+    #       qs:
+    #         input: "What can I do for my pet's health?"
+
+functions:
+  generateUniqueData:
+    - function: "generateUserId"
+    - function: "generateEmail"
+    - function: "generateTargetEmail"
+    - function: "generateTargetId"
+    - function: "generatePostId"
+    - function: "generateCommentId"
+    - function: "generatePhoneNumber"
+
+  generateUserId: |
+    function generateUserId(context, events, done) {
+      const userId = `user_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      context.vars.userId = userId;
+      done();
+    }
+
+  generateEmail: |
+    function generateEmail(context, events, done) {
+      const email = `user_${Date.now()}@example.com`;
+      context.vars.email = email;
+      console.log("Generated context.vars.email :", context.vars.email); 
+      console.log("Generated email :", email); 
+      done();
+    }
+
+  generateTargetEmail: |
+    function generateTargetEmail(context, events, done) {
+      const targetEmail = `user_${Date.now()}@example.com`;
+      context.vars.targetEmail = targetEmail;
+      done();
+    }
+
+  generateTargetId: |
+    function generateTargetId(context, events, done) {
+      const targetId = `target_${Math.floor(Math.random() * 1000)}`;
+      context.vars.targetId = targetId;
+      done();
+    }
+
+  generatePostId: |
+    function generatePostId(context, events, done) {
+      const postId = `post_${Math.floor(Math.random() * 10000)}`;
+      context.vars.postId = postId;
+      done();
+    }
+
+  generateCommentId: |
+    function generateCommentId(context, events, done) {
+      const commentId = `comment_${Math.floor(Math.random() * 10000)}`;
+      context.vars.commentId = commentId;
+      done();
+    }
+  
+  generatePhoneNumber: |
+    function generatePhoneNumber(context, events, done) {
+      const phoneNumber = Math.floor(100000000 + Math.random() * 900000000).toString();
+      context.vars.phoneNumber = phoneNumber;
+      done();
+    }

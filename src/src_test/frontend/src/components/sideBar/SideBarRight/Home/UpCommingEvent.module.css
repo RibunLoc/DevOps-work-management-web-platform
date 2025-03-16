@@ -1,0 +1,54 @@
+.upcomingEventCard {
+  padding: 15px;
+  background-color: #ddebd5;
+  margin-top: 10px;
+  border-radius: 10px;
+}
+
+.upcomingEventCard:hover {
+  border: 1px solid #5c8624;
+  background-color: #d2e6c6;
+}
+
+.headerCard {
+  display: flex;
+  align-items: center;
+}
+
+.headerContent {
+  align-items: center;
+  padding-left: 10px;
+}
+
+.headerContent h5 {
+  color: #000;
+  font-size: 18px;
+}
+
+.headerContent h4 {
+  margin: 0;
+}
+.headerContent h6 {
+  color: #c893f5;
+  font-size: 14px;
+}
+
+.contentCard {
+  padding: 5px 0px;
+}
+
+.footerCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: space-between;
+}
+
+.footerCard h5 {
+  align-self: center;
+}
+
+.location
+{
+  font-size: 15px;
+  color: #5c8624;
+}

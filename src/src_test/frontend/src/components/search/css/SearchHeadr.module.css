@@ -1,0 +1,132 @@
+.container {
+  display: flex;
+  align-items: center;
+  background-color: #f7f7f7;
+  height: 40px;
+  border: 1px solid #dbdbdb;
+  border-radius: 20px;
+  padding: 0 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.container:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Tăng độ bóng khi hover */
+}
+
+.searchIcon {
+  color: #999; /* Đã xóa dấu '' */
+  margin-right: 8px;
+}
+
+.inputText {
+  border: none;
+  outline: none;
+  width: 100%;
+  height: 100%;
+  padding: 0 5px;
+  font-size: 16px; /* Đơn vị đã được thêm vào */
+  color: #333;
+  background: none;
+}
+
+.inputText::placeholder {
+  color: #999;
+  opacity: 1;
+}
+
+.inputText:focus {
+  transition: border-color 0.3s ease; /* Hiệu ứng chuyển đổi */
+}
+
+.modal {
+  background-color: #fff;
+  height: auto;
+  width: 100%;
+  position: absolute;
+  top: 100%;
+  z-index: 10;
+  border-radius: 5px;
+    border: 1px solid #89966B;
+}
+
+
+.icon {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.hidden {
+  display: none;
+  opacity: 0;
+  height: 0;
+  width: 0;
+  pointer-events: none;
+  overflow: hidden;
+  transition: all 0.5s ease;
+}
+
+.visible {
+  display: block;
+  opacity: 1;
+  height: auto;
+  width: auto;
+  pointer-events: all;
+  transition: all 0.5s ease;
+}
+
+.userCard
+{
+    display: flex;
+    padding:10px;
+    gap: 10px;
+}
+
+.avatar
+{
+    height: 35px;
+    width: 35px;
+    overflow: hidden;
+    border-radius: 35px;
+}
+
+.avatar img
+{
+ height: 100%;
+ width: 100%;
+ object-fit: cover;
+}
+
+.searchMain
+{position: relative;}
+
+.userCard .name
+{
+    display: flex;
+    gap:5px;
+    align-items: center;
+}
+
+.userCard:hover
+{
+    cursor: pointer ;
+    background-color:#E7ECDE ;
+}
+
+.userCard p
+{
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.deleteButton {
+  position: absolute !important;
+  right: 10px;
+  top:15%;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.userCardWrapper {
+  position: relative;
+  align-items: center;
+}

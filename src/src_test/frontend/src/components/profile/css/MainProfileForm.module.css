@@ -1,0 +1,58 @@
+.coverContainer {
+    display: flex;
+    top: 0;
+    width:100%;
+    background-color: #CBD9C4;
+}
+
+.bodyContainer {
+    display: inline-block;
+    width: 100%;
+    height: auto;
+    min-height: 100vh;
+    margin: 20px 20px 0px 20px;
+    background-color: #fff;
+    padding: 30px 50px 0px 50px;
+    border-radius: 10px;
+}
+
+.navbar {
+    border-top:2px solid #acacac;
+    padding:0px;
+    margin-top:10px;
+}
+
+.navbar a {
+    position: relative;
+    font-size: 18px;
+    color: #000;
+    font-weight: 500;
+    padding:5px 10px 5px 10px;
+}
+
+.navbar a::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: #000;
+    transition: .3s;
+}
+
+.navbar a:hover {
+    cursor: pointer;
+}
+
+.navbar a:hover::before {
+    width: 100%;
+}
+
+.navbar .active::before {
+    width: 100%;
+}
+
+.link {
+    text-decoration: none;
+}

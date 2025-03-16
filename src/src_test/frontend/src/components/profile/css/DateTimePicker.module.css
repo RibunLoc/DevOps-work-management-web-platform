@@ -1,0 +1,62 @@
+/* Căn chỉnh container */
+.date-picker-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+/* Tùy chỉnh wrapper */
+.react-datetime-picker {
+  font-family: Arial, sans-serif;
+  border: 1px solid #4caf50;
+  border-radius: 8px;
+  padding: 8px;
+  background-color: #f1f1f1;
+  color: #333;
+  width: 250px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Ô input */
+.react-datetime-picker__wrapper {
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background-color: #fff;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.react-datetime-picker__inputGroup {
+  gap: 2px;
+}
+
+.react-datetime-picker__inputGroup__input {
+  font-size: 14px;
+  border: none;
+  background: none;
+  text-align: center;
+  width: 20px;
+}
+
+.react-datetime-picker__inputGroup__divider {
+  margin: 0 2px;
+}
+
+.react-datetime-picker__clear-button,
+.react-datetime-picker__calendar-button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.react-datetime-picker__calendar-button svg {
+  fill: #4caf50;
+}
+
+.react-datetime-picker__clear-button svg {
+  fill: #f44336;
+}

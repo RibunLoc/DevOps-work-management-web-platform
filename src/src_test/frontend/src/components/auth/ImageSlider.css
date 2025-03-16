@@ -1,0 +1,36 @@
+.custom-slider .slick-dots {
+    position: absolute;
+    bottom: 10px;
+    /* Adjust to place the dots where you want them */
+    left: 80%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    /* Ensure dots are on top */
+}
+
+.custom-slider .slick-dots li {
+    margin: 0 5px;
+    /* Space between dots */
+}
+
+.custom-slider .slick-dots li button {
+    background: white;
+    /* Background for dots */
+    border-radius: 50%;
+    /* Round dots */
+    width: 6px;
+    /* Width of dots */
+    height: 6px;
+    /* Height of dots */
+    opacity: 1;
+    /* Ensure full opacity */
+}
+
+.custom-slider .slick-dots li.slick-active button{
+    background: grey;
+    /* Color for active dot */
+}
+
+.custom-slider .slick-dots li button::before {
+    content: ''; /* Ensure there's no default content */
+  }

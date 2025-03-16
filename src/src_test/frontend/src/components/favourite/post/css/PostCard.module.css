@@ -1,0 +1,142 @@
+.container {
+  display: inline-block;
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 15px;
+  background-color: #d2eac5;
+  width: 100%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.container_inside {
+  display: flex;
+  gap: 10px;
+}
+
+.container_img
+{
+  width: 30%;
+  height: 200px;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.image:hover {
+  cursor: pointer;
+}
+
+.container_inside_right {
+  display: inline-block;
+  flex-direction: column;
+  gap: 10px;
+  width: 70%;
+}
+
+.cardHeader {
+    flex-direction: column;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 5px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+}
+
+.section {
+  font-weight: 400;
+  color: #333;
+}
+
+.text {
+  display: inline-block;
+  overflow-wrap: break-word;
+  white-space: normal;
+  line-height: 1.5;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-left: 8px !important;
+}
+
+.text, .content {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%; /* Đảm bảo văn bản không vượt qua chiều rộng của phần tử chứa */
+}
+
+.title {
+  font-weight: 800;
+  font-size: 20px;
+  margin-left: 0 !important;
+  overflow: hidden; 
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.content {
+  font-weight: 650;
+  font-size: 14px;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  background-color: #e6f5de;
+  padding: 5px;
+  border-radius: 10px;
+}
+
+.avatarMini {
+  width: 30px;
+  height: 30px;
+}
+
+.imgHover:hover {
+  opacity: 0.8;
+  cursor: pointer;
+}
+.albumName {
+  margin-left: 6px;
+}
+
+.hoverText:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+.cardAction {
+  display: flex;
+  justify-content: left;
+  margin-top: 30px;
+}
+
+.goToButton {
+  background-color: #5c9ad7 !important;
+  color: #fff !important;
+  font-size: 11px !important;
+}
+.goToButton:hover {
+  background-color: #1976d2 !important;
+}
+
+.removeButton {
+  background-color: #ef8159 !important;
+  color: #fff !important;
+  font-size: 11px !important;
+}
+
+.removeButton:hover {
+  background-color: #ff6c37 !important;
+}

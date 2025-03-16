@@ -1,0 +1,20 @@
+.header {
+  display: flex;
+  padding: 10px 15px;
+  align-items: center;
+  gap: 20px;
+  border-bottom: 2px solid #B7C79E;
+}
+
+.section {
+  font-weight: 700;
+  font-size: 18px;
+  color: #000;
+}
+
+.coverBody {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 cột có kích thước bằng nhau */
+  gap: 16px;
+  padding: 10px
+}

@@ -1,0 +1,55 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.container:hover{
+    background-color: #f0f0f0;
+}
+
+.avt {
+    align-content: center;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.infor {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    padding: 0 10px
+}
+
+.name{
+    justify-content: center;
+    margin:0;
+    font-size: 18px;
+}
+
+h1 {
+    color: black;
+}
+
+.location{
+    margin:0;
+    justify-content: center;
+    font-size: 15px;
+    color: #757575;
+}
+
+.lastMessage {
+    margin:0;
+    font-size: 15px;
+}
+
+.icon {
+    color: gray;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+.icon:hover {
+    color:#C0C0C0;
+    cursor: pointer;
+}
