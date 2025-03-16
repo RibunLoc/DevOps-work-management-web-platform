@@ -1,0 +1,85 @@
+
+.petAvatar {
+    display: flex;
+    border: 4px solid #89966B; /* Màu border tinh tế hơn */
+    width: 265px; /* Điều chỉnh kích thước hợp lý */
+    height: 265px;
+    border-radius: 15px;
+    object-fit: cover; /* Giúp ảnh vừa khít */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Đổ bóng cho nổi bật */
+    position: relative; /* Để tạo box tên phía trên */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    z-index: 5;
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+}
+
+.petAvatar:hover 
+{
+    cursor: pointer;
+}
+
+.petAvatar img
+{
+    width: 100%;
+    border-radius: 10px;
+}
+
+.petAvatar .petInfo {
+    position: absolute;
+    left: 6%;
+    bottom: 6%;
+    background-color: rgba(238, 238, 238, 0.799); /* Nền tối để dễ đọc chữ */
+    color: #000; /* Màu chữ */
+    padding: 8px 12px; /* Khoảng cách nội dung */
+    border-radius: 6px; /* Bo góc */
+    font-size: 14px; /* Cỡ chữ */
+    white-space: nowrap; /* Không xuống dòng */
+    opacity: 0.5; 
+    transition: opacity 0.3s ease; 
+    pointer-events: none; 
+    font-weight: 700;
+}
+.petAvatar .ownerInfo {
+    position: absolute;
+    right: 6%;
+    bottom: 6%;
+    background-color: rgba(238, 238, 238, 0.799); /* Nền tối để dễ đọc chữ */
+    color: #000; /* Màu chữ */
+    padding: 8px 12px; /* Khoảng cách nội dung */
+    border-radius: 6px; /* Bo góc */
+    font-size: 14px; /* Cỡ chữ */
+    white-space: nowrap; /* Không xuống dòng */
+    opacity: 0.5; 
+    transition: opacity 0.3s ease; 
+    pointer-events: none; 
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+}
+
+.petAvatar:hover .petInfo, 
+.petAvatar:hover .ownerInfo {
+    opacity: 1; 
+}
+
+.petAvatar:hover img {
+    scale: 1.03;
+    transition: 0.5s;
+}
+
+.followerCount
+{
+    font-weight: 500;
+}
+
+
+.ownerAvatar img
+{
+    height: 30px;
+    width: 30px;
+    object-fit: cover;
+    border-radius: 50%; /* Tạo avatar hình tròn */
+    overflow: hidden;  
+}

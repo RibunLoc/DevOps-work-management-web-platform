@@ -1,0 +1,11 @@
+.addTextButton {
+    padding-left: 5px;
+    color: #708258;
+    font-weight: bold;
+}
+
+
+
+.btnAddPet:hover .addTextButton {
+    color: #fff;
+}

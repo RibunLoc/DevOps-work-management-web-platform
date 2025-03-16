@@ -1,0 +1,92 @@
+.container {
+  display: flex;
+  padding: 5px
+}
+
+.card {
+  width: 300px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+  padding: 10px;
+  margin-left: 5px;
+}
+.cardHeader
+{
+  display: flex;
+  align-items: center;
+}
+.cardBody h3 {
+  margin: 0;
+  font-size: 1.2em;
+  color: #333;
+}
+
+.cardBody p {
+  margin: 8px 0 0;
+  font-size: 0.9em;
+  color: #555;
+}
+
+.cardFooter {
+  display: flex;
+  margin-left: 5px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cardFooterActions
+{
+  display: flex;
+}
+
+.cardFooter button {
+  padding: 4px 4px;
+  margin: 0px 2.5px;
+  border: none;
+  background-color: transparent;
+  border-radius: 4px;
+  color: #000;
+  font-size: 0.9em;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.3s;
+}
+
+.cardFooter button:hover {
+  color: #007bff;
+}
+
+.cardFooter .like {
+  color: #007bff;
+}
+
+h4 ,p
+{
+  margin:0
+}
+
+.WatchMoreComments
+{
+  margin-left: 5px;
+}
+.WatchMoreComments:hover
+{
+  text-decoration: underline; 
+  cursor: pointer;
+}
+
+.avatar:hover
+{
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+.content 
+{
+  word-wrap: break-word;
+  text-wrap:;
+}
+

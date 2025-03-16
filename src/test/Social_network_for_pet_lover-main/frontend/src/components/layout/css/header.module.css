@@ -1,0 +1,16 @@
+.avatarContainer
+{
+    height: 55px;
+    overflow: hidden;
+}
+
+.avatarContainer:hover
+{
+    cursor: pointer;
+}
+
+.avatarContainer img 
+{
+    height: 100%;
+    object-fit: cover;
+}

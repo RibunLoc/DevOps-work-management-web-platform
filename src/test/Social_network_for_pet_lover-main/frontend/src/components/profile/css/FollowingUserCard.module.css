@@ -1,0 +1,39 @@
+.container
+{
+    background-color: #E7ECDE;
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 10px;
+    gap:10px
+}
+
+.container:hover
+{
+    background-color: #e3f1d0;
+}
+
+
+.avatar
+{
+    border-radius: 10px !important;
+    height: 70px !important;
+    width:  70px !important;
+}
+.avatar:hover
+{
+    opacity: 0.7;
+    cursor: pointer;
+}
+
+.container p
+{
+    width: 100%;
+    font-weight: 500;
+}
+
+.container p:hover
+{
+    cursor: pointer;
+}

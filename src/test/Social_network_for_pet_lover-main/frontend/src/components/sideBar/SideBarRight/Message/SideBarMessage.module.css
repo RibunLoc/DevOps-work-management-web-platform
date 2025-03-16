@@ -1,0 +1,97 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+  border-radius: 10px;
+}
+
+.recent_chats_box {
+  margin-top: 25px;
+}
+
+.title {
+  font-size: 15px;
+  color: gray;
+}
+
+.line {
+  display: inline-block;
+  background-color: #c0c0c0;
+  justify-self: center;
+  width: 90%;
+  height: 2px;
+  margin: 5px 5px;
+}
+
+.see_all {
+  color: #676767;
+  font-weight: bold;
+  font-size: 14px;
+  justify-self: right;
+}
+
+.see_all:hover {
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+.media {
+  justify-self: left;
+  font-weight: bold;
+  font-size: 13px;
+  color: #676767;
+}
+
+.media:hover {
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+.mediaBox {
+  display: flex;
+  justify-content: space-between;
+}
+
+.mediaItem {
+  display: inline-block;
+}
+
+.mediaItem img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.mediaItem img:hover {
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+.finalItem {
+  opacity: relative;
+  overflow: hidden;
+}
+
+.finalItem::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(128, 128, 128, 0.5);
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+.finalItem:hover::after {
+  opacity: 0.8;
+}
+
+ul {
+  margin-left: 0px;
+  list-style-type: none;
+  padding: 0px;
+}

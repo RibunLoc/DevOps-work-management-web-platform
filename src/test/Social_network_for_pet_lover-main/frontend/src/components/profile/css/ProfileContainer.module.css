@@ -1,0 +1,70 @@
+
+
+.container {
+    display: flex;
+    width: 100%;
+}
+
+.avatarContainer {
+}
+
+.containerRight_Top h1 {
+    margin:0;
+    font-size: 25px;
+}
+
+.containerRight {
+    margin-left:20px;
+    width:100%
+}
+
+.containerRight_Top {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0px 10px;
+}
+
+
+.containerRight_Bottom {
+    background-color: #D0E2BA;
+    padding:10px;
+    border-radius: 20px;
+}
+
+.containerinfo
+{
+    display: flex;
+    padding: 5px;
+}
+
+.sectionInfo {
+    display: inline-block; 
+    background-color: #EEF7E6;
+    border-radius: 10px;
+    font-weight: 600;
+    padding: 5px;
+    height: 25px;
+
+}
+
+
+.sectionSenDetails {
+    display: inline-block; 
+    padding: 5px;
+    
+}
+
+.sectionSenDetails {
+    
+}
+
+
+.sectionBossAMount {
+    display: flex; 
+    padding:5px
+}
+
+.bossIcon h5{
+    display: inline-block; 
+    margin: 0;
+}

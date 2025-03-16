@@ -1,0 +1,10 @@
+.container {
+  width: auto;
+  min-height: 96vh;
+  padding: 20px 120px;
+  background-color: #f5f8e7; /* Màu sắc nhẹ hơn cho nền */
+}
+.all {
+  padding: 10px 10px 0px 0px;
+  font-size: 20px;
+}

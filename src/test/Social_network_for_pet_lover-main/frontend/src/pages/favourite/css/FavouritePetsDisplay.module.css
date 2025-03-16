@@ -1,0 +1,6 @@
+.container {
+  padding: 20px 40px;
+  width: auto;
+  min-height: 96vh;
+  background-color: #f5f8e7; /* Màu sắc nhẹ hơn cho nền */
+}

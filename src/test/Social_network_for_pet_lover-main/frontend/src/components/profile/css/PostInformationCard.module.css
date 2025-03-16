@@ -1,0 +1,30 @@
+.countLike {
+
+}
+
+.countLike:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.avatar:hover
+{
+ opacity: 0.8;
+ cursor: pointer;
+}
+
+.userName 
+{
+    font-weight: 800;
+}
+
+.userName:hover
+{
+    text-decoration: underline;   
+    cursor: pointer; 
+}
+
+.image:hover
+{
+    cursor: pointer;
+}
