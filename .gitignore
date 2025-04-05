@@ -44,3 +44,7 @@ yarn-error.log*
 # Thư mục tạm
 tmp/
 temp/
+
+# file pem 
+.pem
+*.pem
