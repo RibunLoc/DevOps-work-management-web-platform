@@ -100,7 +100,7 @@ resource "aws_nat_gateway" "PrivateNatGatewayAz1" {
     Name = "NAT-Gateway-Private-Backend-AZ1"
   }
 
-  depends_on = [aws_internet_gateway.igw]
+  depends_on = [data.aws_internet_gateway.igw]
 }
 
 // Tạo NAT Gateway cho subnet private backend AZ2
@@ -112,7 +112,7 @@ resource "aws_nat_gateway" "PrivateNatGatewayAz2" {
     Name = "NAT-Gateway-Backend-AZ2"
   }
 
-  depends_on = [aws_internet_gateway.igw]
+  depends_on = [data.aws_internet_gateway.igw]
 }
 
 // Tạo Route Table cho public
@@ -184,11 +184,11 @@ resource "aws_route_table_association" "private_rt_association_az2" {
 // Tạo Security Group cho ALB (External)
 resource "aws_security_group" "ALB_SG_External" {
   name        = var.ALB-SG-name
-  description = "Cho phép lưu lượng HTTP và HTTPS truy cập vào"
+  //description = "Cho phép lưu lượng HTTP và HTTPS truy cập vào"
   vpc_id      = data.aws_vpc.vpc.id
 
   ingress {
-    description = "Cho phép truy cập vào port 80"
+    //description = "Cho phép truy cập vào port 80"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
@@ -196,7 +196,7 @@ resource "aws_security_group" "ALB_SG_External" {
   }
 
   ingress {
-    description = "Cho phép truy cập vào port 443"
+    //description = "Cho phép truy cập vào port 443"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
@@ -204,7 +204,7 @@ resource "aws_security_group" "ALB_SG_External" {
   }
 
   egress {
-    description = "Cho phép truy cập ra mọi port"
+    //description = "Cho phép truy cập ra mọi port"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -219,11 +219,11 @@ resource "aws_security_group" "ALB_SG_External" {
 // Tạo Security Group cho Frontend Web
 resource "aws_security_group" "Web_Front_End" {
   name        = var.Web-FrontEnd-SG-name
-  description = "Cho phép lưu lượng truy cập từ ALB đến tầng web."
+  //description = "Cho phép lưu lượng truy cập từ ALB đến tầng web."
   vpc_id      = data.aws_vpc.vpc.id
 
   ingress {
-    description     = "Cho phép truy cập vào từ ALB bên ngoài"
+    //description     = "Cho phep truy cap vao port 443"
     from_port       = 0
     to_port         = 0
     protocol        = "-1"
@@ -232,7 +232,7 @@ resource "aws_security_group" "Web_Front_End" {
 
  
   egress {
-    description = "Cho phép truy cập ra mọi port"
+    //description = "Cho phep truy cap ra moi port"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -247,11 +247,11 @@ resource "aws_security_group" "Web_Front_End" {
 // Tạo Security Group cho ALB phía sau Frontend Web
 resource "aws_security_group" "ALB_SG_Internal" {
   name       = var.ALB-SG-name-internal
-  description = "Cho phép lưu lượng truy cập từ tầng web đến tầng backend."
+  //description = "Cho phep luu luong HTTP và HTTPS truy cap vao ALB internal"
   vpc_id  = data.aws_vpc.vpc.id
 
   ingress {
-    description = "Cho phép mọi truy cập từ Web FrontEnd tới ALB internal"
+    //description = "Cho phép mọi truy cập từ Web FrontEnd tới ALB internal"
     from_port = 0
     to_port = 0
     protocol = "-1"
@@ -259,7 +259,7 @@ resource "aws_security_group" "ALB_SG_Internal" {
   }
 
   egress {
-    description = "Cho phép truy cập ra mọi port"
+    //description = "Cho phép truy cập ra mọi port"
     from_port = 0
     to_port = 0
     protocol = "-1"
@@ -274,11 +274,11 @@ resource "aws_security_group" "ALB_SG_Internal" {
 // Tạo Security Group cho tầng Backend từ ALB internal 
 resource "aws_security_group" "Web_Back_End" {
   name = var.Web-BackEnd-SG-name
-  description = "Cho phép lưu lượng truy cập từ ALB internal đến tầng backend."
+  description = "Cho phep luu luong truy cap tu ALB internal đen tang backend."
   vpc_id = data.aws_vpc.vpc.id
 
   ingress {
-    description = "Cho phép mọi truy cập từ ALB internal tới Web BackEnd"
+    description = "Cho phep moi truy cap tu ALB internal toi Web BackEnd"
     from_port = 0
     to_port = 0
     protocol = "-1"
@@ -286,7 +286,7 @@ resource "aws_security_group" "Web_Back_End" {
   }
 
   egress {
-    description = "Cho phép truy cập ra mọi port"
+    //description = "Cho phép truy cập ra mọi port"
     from_port = 0
     to_port = 0
     protocol = "-1"
@@ -301,11 +301,11 @@ resource "aws_security_group" "Web_Back_End" {
 // Tạo Security Group cho Database
 resource "aws_security_group" "Database" {
   name = var.Database-SG-name
-  description = "Cho phép lưu lượng truy cập từ tầng backend đến database."
+  description = "Cho phep luu luong truy cap tu tang backend den database"
   vpc_id = data.aws_vpc.vpc.id
 
   ingress {
-    description = "Cho phép mọi truy cập từ Web BackEnd tới Database"
+    description = "Cho phep moi truy cap tu Web BackEnd toi Database"
     from_port = 0
     to_port = 0
     protocol = "-1"
@@ -313,7 +313,7 @@ resource "aws_security_group" "Database" {
   }
 
   egress {
-    description = "Cho phép truy cập ra mọi port"
+    description = "Cho phep truy cap ra moi port"
     from_port = 0
     to_port = 0
     protocol = "-1"

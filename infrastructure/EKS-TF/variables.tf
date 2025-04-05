@@ -112,6 +112,11 @@ variable "Database-SG-name" {
   default = "Database-SG"
 }
 
+variable "cluster-name" {
+    description = "Tên của EKS Cluster"
+    type = string
+    default = "My-Cluster"
+}
 
 
 
