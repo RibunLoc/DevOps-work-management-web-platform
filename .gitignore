@@ -1,8 +1,10 @@
-# Thư mục và file Terraform
+# Terraform
 .terraform/
 *.tfstate
 *.tfstate.*
 *.tfvars
+terraform.tfvars
+terraform.tfvars.json
 crash.log
 *.backup
 override.tf
@@ -11,17 +13,36 @@ override.tf.json
 *_override.tf.json
 .terraform.lock.hcl
 
-# File log
+# Logs
+logs/
 *.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
 
-# File cấu hình cá nhân
-terraform.tfvars
-terraform.tfvars.json
+# Build output
+build/
+dist/
 
-# VSCode settings
-.vscode/
+# Node.js (nếu dùng để build UI, dashboard,...)
+node_modules/
 
-# Python (nếu bạn dùng trong dự án DevOps)
+# Tests
+coverage/
+.nyc_output/
+
+# OS hệ thống
+.DS_Store
+
+# Thư mục tạm
+tmp/
+temp/
+.temp/
+.tmp/
+
+# Python (nếu dùng trong DevOps)
 __pycache__/
 *.py[cod]
 *.egg
@@ -44,7 +65,3 @@ yarn-error.log*
 # Thư mục tạm
 tmp/
 temp/
-
-# file pem 
-.pem
-*.pem
