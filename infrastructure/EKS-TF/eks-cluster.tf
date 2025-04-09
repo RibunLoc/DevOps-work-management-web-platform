@@ -4,13 +4,13 @@ resource "aws_eks_cluster" "eks-cluster" {
   
   vpc_config {
     subnet_ids          = [
-                            data.aws_subnet.subnetPublicAz1.id,
-                            data.aws_subnet.subnetPublicAz2.id,
-                            aws_subnet.subnetPrivateAz1.id,
-                            aws_subnet.subnetPrivateAz2.id,
+                            module.vpc.public_subnet_ids[0],
+                            module.vpc.public_subnet_ids[1],
+                            module.vpc.private_subnet_ids[0],
+                            module.vpc.private_subnet_ids[1]
                         ]
     security_group_ids  = [
-                            // viet lai
+                            data.aws_security_group.sg-default.id
                         ]
   }
 

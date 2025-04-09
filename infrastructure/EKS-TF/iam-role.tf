@@ -40,21 +40,21 @@ resource "aws_iam_role" "NodeGroupRole" {
 
 # Đây là kỹ thuật giúp cấp quyền IAM trực tiếp cho từng Pod trong EKS,
 # thường dùng để gắn S3, DynamoDB, CloudWatch vào app.
-data "aws_iam_policy_document" "irsaAssumeRolePolicy" {
-   statement {
-    effect = "Allow"
+# data "aws_iam_policy_document" "irsaAssumeRolePolicy" {
+#    statement {
+#     effect = "Allow"
 
-    principals {
-      type = "Federated"
-      identifiers = [ aws_iam_openid_connect_provider.eks.id ]
-    }
+#     principals {
+#       type = "Federated"
+#       identifiers = [ aws_iam_openid_connect_provider.eks.id ]
+#     }
 
-    actions = ["sts:AssumeRoleWithWebIdentity"]
+#     actions = ["sts:AssumeRoleWithWebIdentity"]
 
-    condition {
-        test = ["StringEquals"]
-        variable = "${replace(aws_iam_openid_connect_provider.eks.url, "https://", "")}:sub"
-        values = ["system:serviceaccount:default:my-service-account"]
-    }
-   }
-}
+#     condition {
+#         test = ["StringEquals"]
+#         variable = "${replace(aws_iam_openid_connect_provider.eks.url, "https://", "")}:sub"
+#         values = ["system:serviceaccount:default:my-service-account"]
+#     }
+#    }
+# }

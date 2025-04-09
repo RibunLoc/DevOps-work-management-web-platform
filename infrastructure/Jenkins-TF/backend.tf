@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket = "terraform-bucket-s3-1111"
+    bucket = "terraform-task-management-1234"
     region = "us-east-1"
     key    = "Jenkins/terraform.tfstate"
     dynamodb_table = "Lock-Files"
@@ -9,7 +9,7 @@ terraform {
   required_version = ">=1.2.0"
   required_providers {
     aws = {
-      version = ">= 4.0.0"
+      version = ">= 3.0.0"
       source = "hashicorp/aws"
     }
   }
