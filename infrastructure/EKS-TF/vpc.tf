@@ -71,148 +71,161 @@ module "route-table-priavte-az2" {
 }
 
 // Tạo Security Group cho ALB (External)
-resource "aws_security_group" "ALB_SG_External" {
-  name        = var.ALB-SG-name
-  //description = "Cho phép lưu lượng HTTP và HTTPS truy cập vào"
-  vpc_id      = module.vpc.vpc_id
+module "security_group_ALB" {
+  source = "../modules/security_group"
+  name = var.ALB-SG-name
+  description = "Cho phep luu luong HTTP và HTTPS truy cap vao ALB."
+  vpc_id = module.vpc.vpc_id
 
-  ingress {
-    //description = "Cho phép truy cập vào port 80"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  ingress_rules = [
+    {
+      from_port = 80
+      to_port = 80
+      protocol = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    },
+    {
+      from_port = 443
+      to_port = 443
+      protocol = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  ]
 
-  ingress {
-    //description = "Cho phép truy cập vào port 443"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    //description = "Cho phép truy cập ra mọi port"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
+  egress_rules = [
+    {
+      from_port = 0
+      to_port = 0
+      protocol = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  ]
+  
   tags = {
-    Name = var.ALB-SG-name
+    Name = "SG-vpc-3tier"
   }
 }
 
-// Tạo Security Group cho Frontend Web
-resource "aws_security_group" "Web_Front_End" {
-  name        = var.Web-FrontEnd-SG-name
-  //description = "Cho phép lưu lượng truy cập từ ALB đến tầng web."
-  vpc_id      = module.vpc.vpc_id
+// Tạo Security Group cho Public subnet 
+module "security_group_subnet_public" {
+  source = "../modules/security_group"
+  description = "Cho phep luu luong mang truy cap tu ALB den tang subnet public"
+  name = var.Web-FrontEnd-SG-name
+  vpc_id = module.vpc.vpc_id
 
-  ingress {
-    //description     = "Cho phep truy cap vao port 443"
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    security_groups = [aws_security_group.ALB_SG_External.id]
-  }
+  ingress_rules = [
+    {
+      from_port = 0
+      to_port = 0
+      protocol = "-1"
+      source_security_group_id = module.security_group_ALB.security_group_id
+      description = "Cho phep luu luong mang truy cap tu ALB den tang subnet public"
+    }
+  ]
 
- 
-  egress {
-    //description = "Cho phep truy cap ra moi port"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  egress_rules = [
+    {
+      from_port = 0
+      to_port = 0
+      protocol = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  ]
 
   tags = {
-    Name = var.Web-FrontEnd-SG-name
+      Name = "SG-vpc-3tier"
   }
 }
 
-// Tạo Security Group cho ALB phía sau Frontend Web
-resource "aws_security_group" "ALB_SG_Internal" {
-  name       = var.ALB-SG-name-internal
-  //description = "Cho phep luu luong HTTP và HTTPS truy cap vao ALB internal"
-  vpc_id  = module.vpc.vpc_id
 
-  ingress {
-    //description = "Cho phép mọi truy cập từ Web FrontEnd tới ALB internal"
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    cidr_blocks = [aws_security_group.Web_Front_End.id]
-  }
+// Tạo Security Group cho ALB phía sau Frontend Web (dự phòng)
+# resource "aws_security_group" "ALB_SG_Internal" {
+#   name       = var.ALB-SG-name-internal
+#   //description = "Cho phep luu luong HTTP và HTTPS truy cap vao ALB internal"
+#   vpc_id  = module.vpc.vpc_id
 
-  egress {
-    //description = "Cho phép truy cập ra mọi port"
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+#   ingress {
+#     //description = "Cho phép mọi truy cập từ Web FrontEnd tới ALB internal"
+#     from_port = 0
+#     to_port = 0
+#     protocol = "-1"
+#     cidr_blocks = [aws_security_group.Web_Front_End.id]
+#   }
 
-  tags = {
-    Name = var.ALB-SG-name-internal
-  }
-}
+#   egress {
+#     //description = "Cho phép truy cập ra mọi port"
+#     from_port = 0
+#     to_port = 0
+#     protocol = "-1"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
 
-// Tạo Security Group cho tầng Backend từ ALB internal 
-resource "aws_security_group" "Web_Back_End" {
+#   tags = {
+#     Name = var.ALB-SG-name-internal
+#   }
+# }
+
+// Tạo Security Group cho tầng Backend từ public subnet xuống
+module "security_group_Worker_Node" {
+  source = "../modules/security_group"
+
   name = var.Web-BackEnd-SG-name
   description = "Cho phep luu luong truy cap tu ALB internal đen tang backend."
   vpc_id = module.vpc.vpc_id
 
-  ingress {
-    description = "Cho phep moi truy cap tu ALB internal toi Web BackEnd"
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    security_groups = [aws_security_group.ALB_SG_Internal.id]
-  }
+  ingress_rules = [
+    {
+      description = "Cho phep luu luong tu public subnet den"
+      from_port = 0
+      to_port = 0
+      protocol = "-1"
+      source_security_group_id = module.security_group_subnet_public.security_group_id
 
-  egress {
-    //description = "Cho phép truy cập ra mọi port"
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    security_groups = ["0.0.0.0/0"]
-  }
+    }
+  ]
+
+  egress_rules = [
+    {
+      from_port = 0
+      to_port = 0
+      protocol = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  ]
 
   tags = {
-    Name = var.Web-BackEnd-SG-name
+    Name = "SG-vpc-3tier"
   }
+
 }
+
 
 // Tạo Security Group cho Database
-resource "aws_security_group" "Database" {
-  name = var.Database-SG-name
-  description = "Cho phep luu luong truy cap tu tang backend den database"
-  vpc_id = module.vpc.vpc_id
+# resource "aws_security_group" "Database" {
+#   name = var.Database-SG-name
+#   description = "Cho phep luu luong truy cap tu tang backend den database"
+#   vpc_id = module.vpc.vpc_id
 
-  ingress {
-    description = "Cho phep moi truy cap tu Web BackEnd toi Database"
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    security_groups = [aws_security_group.Web_Back_End.id]
-  }
+#   ingress {
+#     description = "Cho phep moi truy cap tu Web BackEnd toi Database"
+#     from_port = 0
+#     to_port = 0
+#     protocol = "-1"
+#     security_groups = [aws_security_group.Web_Back_End.id]
+#   }
 
-  egress {
-    description = "Cho phep truy cap ra moi port"
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+#   egress {
+#     description = "Cho phep truy cap ra moi port"
+#     from_port = 0
+#     to_port = 0
+#     protocol = "-1"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
   
-  tags = {
-    Name = var.Database-SG-name
-  }
-}
+#   tags = {
+#     Name = var.Database-SG-name
+#   }
+# }
 
 // Lấy thông tin Security Group mặc định của VPC
 data "aws_security_group" "sg-default" {
