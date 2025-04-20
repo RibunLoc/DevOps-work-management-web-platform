@@ -4,13 +4,13 @@ pipeline {
         jdk 'jdk17'
         nodejs 'Node19'
     }
-    enviroment {
-        SCANNER_HOME=tool 'sonar-scanner'
+    environment {
+        SCANNER_HOME = tool 'sonar-scanner'
     }
     stages {
         stage('Checkout from Git') {
             steps {
-                git branch: 'main', url: 'https://github.com/RibunLoc/DevOps-work-management-web-platform.git'
+                git branch: 'main', url: 'https://github.com/RibunLoc/chatbot-ui.git'
             }
         }
         stage('Install Dependencies') {
@@ -18,8 +18,54 @@ pipeline {
                 sh 'npm install'
             }
         }
-        
-        
+        stage('Docker Build & Push') {
+            steps{
+                script{
+                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
+                        sh "docker build -t app ."
+                        sh "docker tag app ribun/app:latest"
+                        sh "docker push ribun/app:latest"
+                    }
+                }
+            }
+        }
+        stage('Remove container') {
+            steps {
+                sh "docker stop app | true"
+                sh "docker rm app | true"
+            }
+        }
+        stage('Deploy to container'){
+            steps{
+                sh 'docker run -d --name app -p 3000:3000 ribun/app:latest'
+            }
+        }
+        stage('Deploy to kubernetes'){
+            steps{
+                withAWS(credentials: 'aws-key', region: 'us-east-1') {
+                    script{
+                        withKubeConfig(
+                            caCertificate: '',
+                            clusterName: '',
+                            contextName: '', 
+                            credentialsId: 'k8s',
+                            namespace: '', 
+                            restrictKubeConfigAccess: false, serverUrl: ''
+                        ) {
+                            sh 'kubectl apply -f k8s/chatbot-ui.yaml'
+                        }
+                    }
+                }
+            }
+        }
     }
 
+    post {
+        success {
+            echo 'Deployment successful!'
+        }
+        failure {
+            echo 'Deployment failed!'
+        }
+    }
 }
