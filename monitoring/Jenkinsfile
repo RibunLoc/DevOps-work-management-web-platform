@@ -1,0 +1,23 @@
+pipeline {
+    agent any
+    stages {
+        stage ('Clone repo') {
+            steps {
+                git 'https://github.com/RibunLoc/DevOps-work-management-web-platform/monitoring.git'
+            }
+        }
+
+        stage('Build & Run Services') {
+            steps {
+                sh 'docker-compose down'
+                sh 'docker-compose up -d'
+            }
+        }
+        stage('Verify') {
+            steps {
+                sh 'curl -s http://localhost:9090' //Prometheus
+                sh 'curl -s http://localhost:3000' //Grafana
+            }
+        }
+    }
+}
