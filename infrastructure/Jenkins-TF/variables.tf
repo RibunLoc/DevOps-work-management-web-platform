@@ -37,9 +37,3 @@ variable "keypair_name" {
 variable "ec2_name" {
   
 }
-
-variable "bucket-name" {
-    description = "Tên bucket"
-    type = string
-    default = "terraform-bucket-s3-1111"
-}

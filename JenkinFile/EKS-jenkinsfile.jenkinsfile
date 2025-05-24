@@ -1,0 +1,91 @@
+properties([
+    parameters([
+        string(defaultValue: 'variables.tfvars', description: 'Terraform variables file', name: 'TFVARS_FILE'),
+        choice(choices: ['apply', 'destroy'], description: 'Select terraform action', name: 'TF_ACTION')
+    ])
+])
+
+pipeline {
+    agent any
+    enviroment {
+        TF_WORKSPACE = 'default'
+        AWS_REGION = 'us-east-1'
+        TF_DIR     = 'infrastructure/EKS-TF'
+    }
+
+    stages {
+        stage('Checkout from Git') {
+            steps {
+                echo '🔄 Cloning repository...'
+                git branch: 'main', url: 'https://github.com/RibunLoc/DevOps-work-management-web-platform.git'
+            }
+        }
+
+        stage('Initializing Terraform') {
+            steps {
+                withAWS(credentials: 'aws-key', region: "${AWS_REGION}") {
+                    dir("${TF_DIR}") {
+                        script {
+                            echo '🚀 Initializing Terraform...'
+                            sh 'terraform init '
+                        }
+                    }
+                }
+            }
+        }
+        stage('Validate Terraform') {
+            steps {
+                withAWS(credentials: 'aws-key', region: "${AWS_REGION}") {
+                    dir("${TF_DIR}") {
+                        script {
+                            echo '🔍 Validating Terraform config...'
+                            sh 'terraform validate'
+                        }
+                    }
+                }
+            }
+        }
+        stages('Plan Terraform') {
+            steps {
+                withAWS(credentials: 'aws-key', region: "${AWS_REGION}") {
+                    dir("${TF_DIR}") {
+                        script {
+                            echo '📋 Planning Terraform changes...'
+                            sh "terraform plan -var-file=${params.'TFVARS_FILE'}"
+                        }
+                    }
+                }
+            }
+        }
+        stages('Custom Action: Apply or Destroy') {
+            steps {
+                withAWS(credentials: 'aws-key', region: "${AWS_REGION}") {
+                    script {
+                        echo "${params.'TF_ACTION'}"
+                        dir("${TF_DIR}") {
+                            script {
+                                if (params.'TF_ACTION' == 'apply') {
+                                    echo '⚙️ Applying Terraform plan...'
+                                    sh "terraform apply -var-file=${params.'TFVARS_FILE'} -auto-approve"
+                                } else if (params.'TF_ACTION' == 'destroy') {
+                                    echo '🔥 Destroying infrastructure...'
+                                    sh "terraform destroy -var-file=${params.'TFVARS_FILE'} -auto-approve"
+                                } else {
+                                    error "❌ Hành động không hợp lệ: ${params.'TF_ACTION'}"
+                                }
+                            }
+                        }
+                    } 
+                }
+            }
+        }
+    }
+    post {
+        success {
+            echo 'Pipeline hoàn thành thành công!'
+        }
+        failure {
+            echo 'Có lỗi xảy ra trong pipeline.'
+        }
+    }
+}

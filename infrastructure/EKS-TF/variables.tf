@@ -7,13 +7,25 @@ variable "region" {
 variable "vpc-name" {
     description = "Tên của VPC"
     type = string
-    default = "Default_VPC"
+    default = "Jenkins_Server"
 }
 
 variable "igw-name" {
     description = "Tên của Internet Gateway"
     type = string
-    default = "Default_IGW"
+    default = "Jenkins_IGW"
+}
+
+variable "subnet-name-public-fronEnd-az1" {
+    description = "Tên của subnet public FrontEnd AZ1"
+    type = string
+    default = "VPC-3tier-subnet-public-AZ1"
+}
+
+variable "subnet-name-public-fronEnd-az2" {
+    description = "Tên của subnet public FrontEnd AZ2"
+    type = string
+    default = "VPC-3tier-subnet-public-AZ2"
 }
 
 variable "subnet-name-jenkins-az1" {
@@ -112,6 +124,17 @@ variable "Database-SG-name" {
   default = "Database-SG"
 }
 
+variable "cluster-name" {
+    description = "Tên của EKS Cluster"
+    type = string
+    default = "My-Cluster"
+}
+
+variable "eks-node-group-name" {
+    description = "Tên của EKS Node Group"
+    type = string
+    default = "My-Node-Group"
+}
 
 
 

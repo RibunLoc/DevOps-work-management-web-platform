@@ -1,0 +1,71 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_REGION = 'us-east-1'
+        EKS_CLUSTER_NAME = 'Task-Management-Cluster'
+        KUBE_NAMESPACE = 'monitoring'
+    }
+
+    stages {
+        stage('Checkout from Git') {
+            steps {
+                git branch: 'main', url: 'https://github.com/RibunLoc/DevOps-work-management-web-platform.git'
+            }
+        }
+        stage('Install Grafana on EKS') {
+            steps {
+                withAWS(credentials: 'aws-key', region: "${AWS_REGION}") {
+                    script {
+                        sh '''
+                            # Cập nhật kubeconfig để sử dụng EKS
+                            aws eks update-kubeconfig --region ${AWS_REGION} --name ${EKS_CLUSTER_NAME} 
+                            kubectl get nodes
+
+                            # 
+                            helm repo add eks https://aws.github.io/eks-charts  
+                            helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+                                --namespace kube-system \
+                                --set clusterName=<your-cluster> \
+                                --set serviceAccount.create=false \
+                                --set serviceAccount.name=aws-load-balancer-controller  
+
+                            # Tạo namespace
+                            kubectl create namespace ${KUBE_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f - 
+                        
+                            # Thêm repo Helm cho Grafana
+                            helm repo add grafana https://grafana.github.io/helm-charts
+                            helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+                            helm repo update
+
+                            # Cài đặt hoặc cập nhật Grafana và Loki 
+                            helm upgrade --install loki grafana/loki-stack --namespace ${KUBE_NAMESPACE} \
+                                --create-namespace \
+                                --set grafana.enabled=false \
+                                --set promtail.enabled=true
+                                --wait
+
+                            helm upgrade --install grafana grafana/grafana \
+                                --namespace ${KUBE_NAMESPACE} \
+                                --set adminPassword='admin' \
+                                --set service.type=LoadBalancer \
+                                --wait 
+                            
+                            # Cài đặt kube-prometheus-stack 
+                            helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
+                                --namespace ${KUBE_NAMESPACE} \
+                                --set grafana.adminPassword='Admin123!' \
+                                --set grafana.service.type=LoadBalancer \
+                                --set prometheus.service.type=LoadBalancer \
+                                --wait
+
+                            
+                        '''
+
+                    }
+                }
+
+            }
+        }
+    }
+}
