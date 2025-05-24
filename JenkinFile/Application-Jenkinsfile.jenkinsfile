@@ -42,7 +42,7 @@ pipeline {
         }
         stage('Deploy to kubernetes'){
             steps{
-                // withAWS(credentials: 'aws-key', region: 'us-east-1') {
+                withAWS(credentials: 'aws-key', region: 'us-east-1') {
                     script{
                         withKubeConfig(
                             caCertificate: '',
@@ -55,7 +55,7 @@ pipeline {
                             sh 'kubectl apply -f k8s/chatbot-ui.yaml'
                         }
                     }
-                // }
+                }
             }
         }
     }

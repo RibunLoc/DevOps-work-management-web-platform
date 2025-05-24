@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api-gateway-service
+  template:
+    metadata:
+      labels:
+        app: api-gateway-service
+    spec:
+      containers:
+        - name: api-gateway-container
+          image: ribun/octaltask-backend-api-gateway:v1.0
+          ports:
+            - containerPort: 3000
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+        - name: auth-container
+          image: ribun/octaltask-backend-auth-service:v1.0
+          ports:
+            - containerPort: 50051
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: task-service
+  template:
+    metadata:
+      labels:
+        app: task-service
+    spec:
+      containers:
+        - name: task-container
+          image: ribun/octaltask-backend-task-service:v1.0
+          ports:
+            - containerPort: 50052
+

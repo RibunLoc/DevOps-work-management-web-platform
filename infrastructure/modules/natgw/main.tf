@@ -1,5 +1,5 @@
 resource "aws_eip" "natgw" {
-  vpc = true
+  domain = "vpc"
   tags = {
     Name = "NAT-Gateway-EIP-${var.public_subnet_id}"
   }
