@@ -1,1 +1,0 @@
-# SE100---Social_network_for_fashion_lover

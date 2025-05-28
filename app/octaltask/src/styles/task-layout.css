@@ -1,0 +1,113 @@
+/* Task layout styles */
+.task-container {
+  position: relative;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.task-container.blur {
+  filter: blur(3px);
+  opacity: 0.6;
+}
+
+/* Modals and overlays */
+.modal-overlay {
+  z-index: 100; /* Baseline z-index for modals */
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+/* Task detail modal override to ensure it's on top */
+.task-detail-overlay {
+  z-index: 101 !important; /* Higher than other modals */
+  backdrop-filter: blur(5px);
+}
+
+/* List creation and share modals */
+.list-modal-overlay {
+  z-index: 102 !important; /* Even higher to be on top of task detail */
+}
+
+/* Grid component styles */
+.tasks-grid-page {
+  position: relative;
+  z-index: 50;
+}
+
+.tasks-grid-card {
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  z-index: 10;
+}
+
+.tasks-grid-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+}
+
+/* Task list item styles */
+.task-item {
+  position: relative;
+  border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+}
+
+.task-item:last-child {
+  border-bottom: none;
+}
+
+.task-item:hover {
+  background-color: rgba(249, 250, 251, 0.8);
+}
+
+.dark .task-item:hover {
+  background-color: rgba(55, 65, 81, 0.3);
+}
+
+/* Checkbox styling */
+.hidden-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.custom-checkbox {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Animation for notifications */
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up-fade {
+  animation: slideUpFade 0.3s ease-out forwards;
+}
+
+/* Custom scrollbar for task lists */
+.task-list-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.task-list-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.task-list-container::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 20px;
+}
+
+.dark .task-list-container::-webkit-scrollbar-thumb {
+  background-color: rgba(75, 85, 99, 0.5);
+}

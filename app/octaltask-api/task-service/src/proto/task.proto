@@ -1,0 +1,231 @@
+syntax = "proto3";
+
+package task;
+
+service TaskService {
+  rpc CreateTask (CreateTaskRequest) returns (TaskResponse);
+  rpc GetAllTasks (GetAllTasksRequest) returns (TaskListResponse);
+  rpc GetTaskById (TaskByIdRequest) returns (TaskResponse);
+  rpc UpdateTask (UpdateTaskRequest) returns (TaskResponse);
+  rpc DeleteTask (TaskByIdRequest) returns (MessageResponse);
+  rpc GetAllTasksForAdmin (EmptyRequest) returns (TaskListResponse);
+  rpc GetTaskByIdForAdmin (TaskIdRequest) returns (TaskResponse);
+  rpc AdminUpdateTask (AdminUpdateTaskRequest) returns (TaskResponse);
+  rpc AdminDeleteTask (TaskIdRequest) returns (MessageResponse);
+  rpc GetAllTasksByUserId (UserIdRequest) returns (TaskListResponse);
+  
+  // Updated comment methods
+  rpc AddCommentToTask (AddCommentRequest) returns (CommentResponse);
+  rpc GetCommentsForTask (TaskCommentsRequest) returns (CommentListResponse);
+  rpc GetComment (CommentByIdRequest) returns (CommentResponse);
+  rpc UpdateComment (UpdateCommentRequest) returns (CommentResponse);
+  rpc DeleteComment (DeleteCommentRequest) returns (MessageResponse);
+  
+  // Updated subtask methods
+  rpc AddSubtaskToTask (AddSubtaskRequest) returns (SubtaskResponse);
+  rpc GetSubtasksForTask (TaskSubtasksRequest) returns (SubtaskListResponse);
+  rpc GetSubtask (SubtaskByIdRequest) returns (SubtaskResponse);
+  rpc UpdateSubtask (UpdateSubtaskRequest) returns (SubtaskResponse);
+  rpc DeleteSubtask (DeleteSubtaskRequest) returns (MessageResponse);
+
+  // List methods
+  rpc CreateList (CreateListRequest) returns (ListResponse);
+  rpc GetAllLists (GetAllListsRequest) returns (ListListResponse);
+  rpc GetListById (ListByIdRequest) returns (ListResponse);
+  rpc UpdateList (UpdateListRequest) returns (ListResponse);
+  rpc DeleteList (ListByIdRequest) returns (MessageResponse);
+}
+
+message EmptyRequest {}
+
+message CreateTaskRequest {
+  string title = 1;
+  string description = 2;
+  bool isCompleted = 3;
+  string dueDate = 4;
+  UserInfo user = 5;
+}
+
+message GetAllTasksRequest {
+  UserInfo user = 1;
+}
+
+message TaskByIdRequest {
+  int32 id = 1;
+  UserInfo user = 2;
+}
+
+message TaskIdRequest {
+  int32 id = 1;
+}
+
+message UpdateTaskRequest {
+  int32 id = 1;
+  string title = 2;
+  string description = 3;
+  bool isCompleted = 4;
+  string dueDate = 5;
+  UserInfo user = 6;
+}
+
+message AdminUpdateTaskRequest {
+  int32 id = 1;
+  string title = 2;
+  string description = 3;
+  bool isCompleted = 4;
+  string dueDate = 5;
+}
+
+message UserIdRequest {
+  int32 userId = 1;
+}
+
+message UserInfo {
+  int32 userId = 1;
+  string email = 2;
+  string role = 3;
+}
+
+message TaskResponse {
+  int32 id = 1;
+  string title = 2;
+  string description = 3;
+  bool isCompleted = 4;
+  string dueDate = 5;
+  UserInfo user = 6;
+}
+
+message TaskListResponse {
+  repeated TaskResponse tasks = 1;
+}
+
+message MessageResponse {
+  string message = 1;
+}
+
+// New message types for comment functionality
+message AddCommentRequest {
+  int32 taskId = 1;
+  string content = 2;
+  UserInfo user = 3;
+}
+
+message TaskCommentsRequest {
+  int32 taskId = 1;
+  UserInfo user = 2;
+}
+
+message CommentResponse {
+  int32 id = 1;
+  string content = 2;
+  string createdAt = 3;
+  UserInfo user = 4;
+}
+
+message CommentListResponse {
+  repeated CommentResponse comments = 1;
+}
+
+message UpdateCommentRequest {
+  int32 taskId = 1;
+  int32 commentId = 2;
+  string content = 3;
+  UserInfo user = 4;
+}
+
+message DeleteCommentRequest{
+  int32 taskId = 1;
+  int32 commentId = 2;
+  UserInfo user = 3;
+}
+
+// New message types for subtask functionality
+message AddSubtaskRequest {
+  int32 taskId = 1;
+  string content = 2;
+  bool isCompleted = 3;
+  UserInfo user = 4;
+}
+
+message TaskSubtasksRequest {
+  int32 taskId = 1;
+  UserInfo user = 2;
+}
+
+message SubtaskResponse {
+  int32 id = 1;
+  string content = 2;
+  bool isCompleted = 3;
+  string createdAt = 4;
+  UserInfo user = 5;
+}
+
+message SubtaskListResponse {
+  repeated SubtaskResponse subtasks = 1;
+}
+
+message UpdateSubtaskRequest {
+  int32 taskId = 1;
+  int32 subtaskId = 2;
+  string content = 3;
+  bool isCompleted = 4;
+  UserInfo user = 5;
+}
+
+message DeleteSubtaskRequest{
+  int32 taskId = 1;
+  int32 subtaskId = 2;
+  UserInfo user = 3;
+}
+
+// New request types
+message CommentByIdRequest {
+  int32 commentId = 1;
+  UserInfo user = 2;
+}
+
+message SubtaskByIdRequest {
+  int32 subtaskId = 1;
+  UserInfo user = 2;
+}
+
+// New message types for list functionality
+message CreateListRequest {
+  string name = 1;
+  string icon = 2;
+  string color = 3;
+  string dueDate = 4;
+  UserInfo user = 5;
+}
+
+message GetAllListsRequest {
+  UserInfo user = 1;
+}
+
+message ListByIdRequest {
+  int32 id = 1;
+  UserInfo user = 2;
+}
+
+message UpdateListRequest {
+  int32 id = 1;
+  string name = 2;
+  string icon = 3;
+  string color = 4;
+  string dueDate = 5;
+  UserInfo user = 6;
+}
+
+message ListResponse {
+  int32 id = 1;
+  string name = 2;
+  string icon = 3;
+  string color = 4;
+  string dueDate = 5;
+  UserInfo user = 6;
+  repeated TaskResponse tasks = 7;
+}
+
+message ListListResponse {
+  repeated ListResponse lists = 1;
+}
