@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package auth;
+
+service AuthService {
+  rpc Login (LoginRequest) returns (TokenResponse);
+  rpc Signup (SignupRequest) returns (MessageResponse);
+  rpc RequestPasswordReset (ResetRequest) returns (MessageResponse);
+  rpc ResetPassword (ResetPasswordInput) returns (MessageResponse);
+  rpc GetUserById (UserByIdRequest) returns (UserResponse);
+}
+
+message User {
+  int32 id = 1;
+  string email = 2;
+  string name = 3;
+  string role = 4;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message SignupRequest {
+  string email = 1;
+  string password = 2;
+  string name = 3;
+}
+
+message ResetRequest {
+  string email = 1;
+}
+
+message ResetPasswordInput {
+  string token = 1;
+  string newPassword = 2;
+}
+
+message UserByIdRequest {
+  int32 userId = 1;
+}
+
+message TokenResponse {
+  string accessToken = 1;
+}
+
+message MessageResponse {
+  string message = 1;
+  User user = 2;
+}
+
+message UserResponse {
+  User user = 1;
+}
