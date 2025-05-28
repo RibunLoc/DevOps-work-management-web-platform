@@ -1,0 +1,53 @@
+/* Google-like Dark Theme */
+.dark {
+  /* Core colors - Google-like dark theme with consistent gray backgrounds */
+  --background: #202124; /* Google's standard dark background */
+  --foreground: #e8eaed; /* Light gray text, not pure white */
+
+  /* Card and components - Subtle elevation layers */
+  --card: #2d2e31; /* Google's card surfaces */
+  --card-foreground: #e8eaed;
+  --popover: #2d2e31;
+  --popover-foreground: #e8eaed;
+
+  /* Primary colors - Google blue */
+  --primary: #8ab4f8; /* Google's blue for dark mode */
+  --primary-foreground: #202124;
+
+  /* Secondary colors - Subtle but distinct */
+  --secondary: #3c4043; /* Google's secondary surface color */
+  --secondary-foreground: #e8eaed;
+
+  /* Muted elements - Better contrast for accessibility */
+  --muted: #28292c;
+  --muted-foreground: #9aa0a6; /* Google's secondary text color */
+
+  /* Accent colors - More distinct and vibrant */
+  --accent: #1a73e8; /* Google accent blue */
+  --accent-foreground: #ffffff;
+
+  /* Functional colors - Clear signaling */
+  --destructive: #f28b82; /* Google's red for dark mode */
+
+  /* Border and focus elements - More defined */
+  --border: #5f6368; /* Google's border color */
+  --input: #3c4043;
+  --ring: #8ab4f8; /* Google's focus blue */
+
+  /* Chart colors - Google's material design palette for dark */
+  --chart-1: #8ab4f8; /* Blue */
+  --chart-2: #a8dab5; /* Green */
+  --chart-3: #f8c3b9; /* Red/Pink */
+  --chart-4: #d7aefb; /* Purple */
+  --chart-5: #fde293; /* Yellow */
+
+  /* Sidebar specific colors - Distinct from main content */
+  --sidebar: #202124; /* Same as main background */
+  --sidebar-foreground: #e8eaed;
+  --sidebar-primary: #8ab4f8;
+  --sidebar-primary-foreground: #202124;
+  --sidebar-accent: #3c4043;
+  --sidebar-accent-foreground: #e8eaed;
+  --sidebar-border: #5f6368;
+  --sidebar-ring: #8ab4f8;
+}
