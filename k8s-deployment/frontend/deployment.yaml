@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: octaltask-web-front
+  namespace: frontend-dev
   labels:
     app: web-frontend
 spec:
@@ -16,7 +17,7 @@ spec:
     spec:
       containers:
         - name: frontend-container
-          image: ribun/TaskManagement_Frontend:v1.0
+          image: ribun/octaltask-frontend-webd:v1.0
           ports:
             - containerPort: 80
           env:

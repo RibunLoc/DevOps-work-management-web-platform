@@ -10,7 +10,7 @@ import { Comment } from 'src/entities/comment.entity';
 
 @Module({
   imports: [
-    ConfigModule, 
+    ConfigModule,
     TypeOrmModule.forFeature([Task]),
     TypeOrmModule.forFeature([User]),
     TypeOrmModule.forFeature([Comment]),
@@ -19,4 +19,4 @@ import { Comment } from 'src/entities/comment.entity';
   controllers: [SubtaskController],
   providers: [SubtaskService],
 })
-export class SubtaskModule {}
+export class SubtaskModule { }

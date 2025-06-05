@@ -33,4 +33,4 @@ import { getTaskGrpcClientOptions } from 'src/client-options/task.grpc-client';
   controllers: [SubtaskController],
   providers: [SubtaskService],
 })
-export class SubtaskModule {}
+export class SubtaskModule { }

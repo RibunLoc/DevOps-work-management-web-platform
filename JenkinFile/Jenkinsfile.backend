@@ -1,0 +1,42 @@
+pipeline {
+    agent any
+
+    // Cung cấp thông tin cần thiết cho pipeline
+    parameters {
+        string(name: 'TAG_NAME', defaultValue: 'v1.0', description: 'Đây là tag mà bạn muốn gán chi image Docker')
+        string(name: 'NAME_DOCKER', defaultValue: 'ribun', description: 'Tên của docker mà bạn sử dụng để lưu trữ image ')
+        string(name: 'NAME_IMAGE', defaultValue: 'TaskManagement_Backend', description: 'Tên của image docker mà bạn muốn tạo')
+    }
+    // Khai báo các biến môi trường cần thiết
+    environment {
+        SCANNER_HOME = tool 'sonar-scanner' // Đường dẫn đến SonarQube Scanner
+    }
+    // Khai báo các công cụ cần thiết cho pipeline
+    tools {
+        nodejs 'node22'
+    }
+    stages {
+        // Kiểm tra mã nguồn
+        stage('Checkout from Git') {
+            steps {
+                git branch: 'develop', url: 'https://github.com/RibunLoc/DevOps-work-management-web-platform.git'
+            }
+        }
+        // Thiết lập biến môi trường cần thiết cho quá trình build
+        stage('SET UP ENVIRONMENT') {
+            REPO_IMAGE = "${params.NAME_DOCKER}/${params.NAME_IMAGE}:${params.TAG_NAME}"
+        }
+        // Cài đặt các dependencies cần thiết cho quá trình build 
+        stage('Install Dependencies') {
+            steps {
+                dir('app/octaltask-api') {
+                    script {
+                        sh '''
+                            npm install
+                        '''
+                    }
+                }
+            }
+        }
+    }
+}

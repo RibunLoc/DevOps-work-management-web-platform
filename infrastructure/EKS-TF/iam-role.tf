@@ -33,7 +33,7 @@ resource "aws_iam_role" "NodeGroupRole" {
         ]
   })
   tags = {
-    Name = "EKSNodeGroupRole"
+    Name = "${var.cluster_name}-nodegroup-role"
     Environment = "dev"
   }
 }

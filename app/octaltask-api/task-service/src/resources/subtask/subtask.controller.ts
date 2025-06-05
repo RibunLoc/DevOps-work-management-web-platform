@@ -6,7 +6,7 @@ import { status } from '@grpc/grpc-js';
 
 @Controller()
 export class SubtaskController {
-  constructor(private readonly subtaskService: SubtaskService) {}
+  constructor(private readonly subtaskService: SubtaskService) { }
 
   @GrpcMethod('TaskService', 'GetSubtask')
   async getSubtask(data: { subtaskId: number; user: any }) {
@@ -34,7 +34,7 @@ export class SubtaskController {
           message: error.message
         });
       }
-      
+
       if (error.name === 'ForbiddenException') {
         throw new RpcException({
           code: status.PERMISSION_DENIED, // PERMISSION_DENIED
@@ -85,7 +85,7 @@ export class SubtaskController {
           message: error.message
         });
       }
-      
+
       if (error.name === 'ForbiddenException') {
         throw new RpcException({
           code: status.PERMISSION_DENIED, // PERMISSION_DENIED
@@ -132,7 +132,7 @@ export class SubtaskController {
           message: error.message
         });
       }
-      
+
       if (error.name === 'ForbiddenException') {
         throw new RpcException({
           code: status.PERMISSION_DENIED, // PERMISSION_DENIED

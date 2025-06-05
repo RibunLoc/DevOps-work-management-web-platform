@@ -1,12 +1,11 @@
-// src/task/dto/create-comment.dto.ts
 import { IsNotEmpty, IsString, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCommentDto {
   @ApiProperty({
+    example: 'This task needs more details',
     description: 'Content of the comment',
-    example: 'This task is progressing well!',
-    required: true
+    minLength: 1
   })
   @IsNotEmpty()
   @IsString()

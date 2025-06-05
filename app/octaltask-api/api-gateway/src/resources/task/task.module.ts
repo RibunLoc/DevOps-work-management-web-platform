@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { TaskController } from './task.controller';
 import { ClientsModule } from '@nestjs/microservices';
-import { getTaskGrpcClientOptions} from '../../client-options/task.grpc-client';
+import { getTaskGrpcClientOptions } from '../../client-options/task.grpc-client';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from '../../strategies/jwt.strategy';
@@ -34,5 +34,5 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   controllers: [TaskController],
   exports: [TaskService],
 })
-export class TaskModule {}
+export class TaskModule { }
 

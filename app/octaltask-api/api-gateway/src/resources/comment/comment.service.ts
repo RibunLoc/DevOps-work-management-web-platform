@@ -13,7 +13,7 @@ interface CommentGrpcService {
 export class CommentService {
   private commentGrpcService: CommentGrpcService;
 
-  constructor(@Inject('TASK_PACKAGE') private readonly client: ClientGrpc) {}
+  constructor(@Inject('TASK_PACKAGE') private readonly client: ClientGrpc) { }
 
   onModuleInit() {
     this.commentGrpcService = this.client.getService<CommentGrpcService>('TaskService');

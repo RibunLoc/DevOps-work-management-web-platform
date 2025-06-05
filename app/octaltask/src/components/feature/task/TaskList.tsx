@@ -1,5 +1,5 @@
 import { Task } from '@/types/task';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, isValid, parseISO, differenceInDays, differenceInHours, differenceInMinutes, isToday, isTomorrow, isYesterday, isPast } from 'date-fns';
 import { Calendar, Edit2, Plus, Trash2, Star, GripVertical } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Button } from '../../ui/button';
@@ -22,15 +22,63 @@ interface TaskListProps {
     onReorderTasks?: (startIndex: number, endIndex: number) => void;
 }
 
-
 const formatDueDate = (dateString: string) => {
-    try {
-        const date = new Date(dateString);
-        return formatDistanceToNow(date, { addSuffix: true });
-    } catch (e) {
-        return dateString;
+  if (!dateString) {
+    return 'No due date';
+  }
+
+  let date = parseISO(dateString);
+  if (!isValid(date)) {
+    date = new Date(dateString);
+  }
+
+  if (!isValid(date)) {
+    return 'Invalid date';
+  }
+
+  const now = new Date();
+
+  // Handle overdue tasks
+  if (isPast(date) && !isToday(date)) {
+    if (isYesterday(date)) {
+      return 'Due yesterday';
     }
+    const daysOverdue = Math.abs(differenceInDays(now, date));
+    return `${daysOverdue} day${daysOverdue > 1 ? 's' : ''} overdue`;
+  }
+
+  // Handle today's tasks
+  if (isToday(date)) {
+    const hoursLeft = differenceInHours(date, now);
+    const minutesLeft = differenceInMinutes(date, now);
+
+    if (minutesLeft < 0) {
+      return 'Overdue today';
+    } else if (minutesLeft < 60) {
+      return `Due in ${minutesLeft} min${minutesLeft !== 1 ? 's' : ''}`;
+    } else if (hoursLeft < 24) {
+      return `Due in ${hoursLeft} hour${hoursLeft !== 1 ? 's' : ''}`;
+    } else {
+      return 'Due today';
+    }
+  }
+
+  // Handle tomorrow's tasks
+  if (isTomorrow(date)) {
+    return 'Due tomorrow';
+  }
+
+  // Handle upcoming tasks
+  const daysUntil = differenceInDays(date, now);
+
+  if (daysUntil <= 7) {
+    return `Due in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`;
+  }
+
+  // For distant dates, use the standard format
+  return formatDistanceToNow(date, { addSuffix: true });
 };
+
 
 const isTaskDue = (dateString: string) => {
     try {
@@ -83,7 +131,7 @@ export function TaskList({
                 ...newTaskBase,
                 id: Math.random().toString(36).substr(2, 9),
                 notes: '',
-                position: 0,
+                // position: 0,
             };
             setLocalTasks([newTaskWithId, ...localTasks]);
         }
@@ -100,7 +148,7 @@ export function TaskList({
         if (onUpdateTask) {
             onUpdateTask(taskId, {
                 completed: newCompletedState,
-                updatedAt: new Date().toISOString()
+                // updatedAt: new Date().toISOString()
             });
         } else {
             setLocalTasks(localTasks.map(t =>
@@ -154,7 +202,7 @@ export function TaskList({
     if (tasks.length === 0) {
         return (
           <div className="mt-4">
-            <div className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-md overflow-hidden">
+            <div className="overflow-hidden bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700">
               <div className="p-4">
                 <div className="flex items-center space-x-2">
                   <Input
@@ -163,16 +211,16 @@ export function TaskList({
                     onChange={e => setNewTaskTitle(e.target.value)}
                     onKeyDown={handleKeyDown}
                     ref={inputRef}
-                    className="flex-1 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 focus:border-transparent rounded-lg shadow-sm transition-all"
+                    className="flex-1 text-gray-900 placeholder-gray-500 transition-all bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 focus:border-transparent"
                   />
 
                   <Button
                     size="sm"
                     onClick={addTask}
                     disabled={!newTaskTitle.trim()}
-                    className="ml-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                    className="ml-2 text-white transition-all bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <Plus className="h-4 w-4 mr-1" />
+                    <Plus className="w-4 h-4 mr-1" />
                     Add
                   </Button>
                 </div>
@@ -186,7 +234,7 @@ export function TaskList({
     return (
       <DndProvider backend={HTML5Backend}>
         <div className="mt-6 space-y-3">
-          <div className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-md p-3">
+          <div className="p-3 bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700">
             <div className="flex items-center">
               <Input
                 placeholder="Add a new task..."
@@ -194,16 +242,16 @@ export function TaskList({
                 onChange={e => setNewTaskTitle(e.target.value)}
                 onKeyDown={handleKeyDown}
                 ref={inputRef}
-                className="flex-1 border-0 focus:ring-0 bg-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 h-10 pl-3 pr-3 rounded-lg shadow-sm focus:outline-none transition-all"
+                className="flex-1 h-10 pl-3 pr-3 text-gray-900 placeholder-gray-500 transition-all bg-transparent border-0 rounded-lg shadow-sm focus:ring-0 dark:text-white dark:placeholder-gray-400 focus:outline-none"
               />
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={addTask}
                 disabled={!newTaskTitle.trim()}
-                className="rounded-full h-8 w-8 p-0 ml-2 hover:bg-gray-100 dark:hover:bg-gray-700 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
+                className="w-8 h-8 p-0 ml-2 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
               >
-                <Plus className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <Plus className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </Button>
             </div>
           </div>
@@ -219,8 +267,8 @@ export function TaskList({
                 onMouseLeave={() => setActiveTaskId(null)}
               >
                 <div className="flex items-center gap-3">
-                  <div className="cursor-grab text-gray-400 dark:text-gray-600">
-                    <GripVertical className="h-5 w-5" />
+                  <div className="text-gray-400 cursor-grab dark:text-gray-600">
+                    <GripVertical className="w-5 h-5" />
                   </div>
                   <Checkbox
                     checked={task.completed}
@@ -245,12 +293,12 @@ export function TaskList({
                             : 'text-gray-500 dark:text-gray-400'
                         }`}
                       >
-                        <Calendar className="h-3 w-3 mr-1" />
+                        <Calendar className="w-3 h-3 mr-1" />
                         {formatDueDate(task.dueDate)}
                       </div>
                     )}
                     {task.notes && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
                         {task.notes}
                       </p>
                     )}
@@ -264,7 +312,7 @@ export function TaskList({
                         activeTaskId === task.id ? 'opacity-100' : 'opacity-0'
                       }`}
                     >
-                      <Edit2 className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                      <Edit2 className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                     </Button>
                     <Button
                       variant="ghost"
@@ -274,13 +322,13 @@ export function TaskList({
                         activeTaskId === task.id ? 'opacity-100' : 'opacity-0'
                       }`}
                     >
-                      <Trash2 className="h-4 w-4 text-gray-500 dark:text-gray-400  " />
+                      <Trash2 className="w-4 h-4 text-gray-500 dark:text-gray-400 " />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={e => toggleTaskStar(task.id, e)}
-                      className="h-8 w-8 p-0 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-900/30 hover:text-yellow-500"
+                      className="w-8 h-8 p-0 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-900/30 hover:text-yellow-500"
                     >
                       <Star
                         className={`h-4 w-4 ${

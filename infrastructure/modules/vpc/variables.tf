@@ -10,14 +10,14 @@ variable "cidr_block" {
   default     = "10.0.0.0/16"
 }
 
-variable "subnet_public_name" {
-  description = "Name of the public subnet"
+variable "subnet_public_cidrs" {
+  description = "CIDR of the public subnet"
   type        = list(string)
   
 }
 
-variable "subnet_private_name" {
-  description = "Name of the private subnet"
+variable "subnet_private_cidrs" {
+  description = "CIDR of the private subnet"
   type        = list(string)
   
 }
@@ -25,4 +25,10 @@ variable "subnet_private_name" {
 variable "azs" {
   description = "value of the availability zones"
   type        = list(string)
+}
+
+variable "cluster_name" {
+  description = "Name of the EKS cluster"
+  type        = string
+  default     = "Task-Management-Cluster"
 }

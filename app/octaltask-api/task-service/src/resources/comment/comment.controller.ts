@@ -5,7 +5,7 @@ import { status } from '@grpc/grpc-js';
 
 @Controller()
 export class CommentController {
-  constructor(private readonly commentService: CommentService) {}
+  constructor(private readonly commentService: CommentService) { }
 
   @GrpcMethod('TaskService', 'GetComment')
   async getComment(data: { commentId: number; user: any }) {
@@ -33,7 +33,7 @@ export class CommentController {
           message: 'Comment not found'
         });
       }
-      
+
       if (error.message === 'Permission denied to view this comment') {
         throw new RpcException({
           code: status.PERMISSION_DENIED,
@@ -91,7 +91,7 @@ export class CommentController {
           message: 'Comment not found'
         });
       }
-      
+
       if (error.message === 'Permission denied to update this comment') {
         throw new RpcException({
           code: status.PERMISSION_DENIED,
@@ -138,7 +138,7 @@ export class CommentController {
           message: 'Comment not found'
         });
       }
-      
+
       if (error.message === 'Permission denied to delete this comment') {
         throw new RpcException({
           code: status.PERMISSION_DENIED,

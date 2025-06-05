@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket         = "terraform-task-management-2222"
+    bucket         = "terraform-task-management-4444"
     region         = "us-east-1"
     key            = "Task-Management/EKS-TF/terraform.tfstate"
     dynamodb_table = "Lock-Files"
@@ -9,7 +9,7 @@ terraform {
    required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "> 4.0"
+      version = ">= 5.34.0"
     }
     helm = {
       source = "hashicorp/helm"

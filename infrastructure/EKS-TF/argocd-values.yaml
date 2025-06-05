@@ -1,0 +1,37 @@
+# Ref - https://github.com/argoproj/argo-helm/blob/main/charts/argo-cd/values.yaml
+server:
+  service:
+    type: ClusterIP
+  
+  ingress:
+    enabled: true
+    ingressClassName: alb
+    annotations:
+      kubernetes.io/ingress.class: alb
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/backend-protocol: HTTP
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}, {"HTTPS":443}]'
+      alb.ingress.kubernetes.io/group.name: "argocd-alb-group"
+      alb.ingress.kubernetes.io/load-balancer-name: "alb-argocd"
+      alb.ingress.kubernetes.io/ssl-redirect: '443'
+    
+    hostname: "argocd.netsena.io.vn"
+    path: /*
+    pathType: Prefix
+    tls: false
+
+configs:
+  secret:
+    argocdServerAdminPassword: $2a$10$WB6tAqyvGrhooHauWJOfqeFaWdVekKwsasIAZwNj7mGc8frYgN67q
+
+controller:
+  enableStatefulSet: true
+
+applicationSet:
+  enabled: true
+
+dex:
+  enabled: false
+
+

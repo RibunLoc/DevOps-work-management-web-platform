@@ -27,8 +27,8 @@ export default function Navbar({ activeSection = '' }: NavbarProps) {
     return (
         <div>
             <header className="fixed w-full transition-all duration-500 z-50 sticky top-2">
-                <div className="max-w-7xl mx-auto px-4">
-                    <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-2xl shadow-2xl shadow-blue-500/10 border border-blue-200 dark:border-blue-700 hover:shadow-blue-500/20 hover:scale-[1.02] transition-all duration-300">
+                <div className="max-w-full">
+                    <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-tr-xs shadow-2xl shadow-blue-500/10 dark:border-blue-700 hover:shadow-blue-500/20 hover:scale-[1.02] transition-all duration-300">
                         <div className="px-6 py-4 flex justify-between items-center">
                     <Logo size="md" color={darkMode ? 'blueLight' : 'blueDark'} className="font-sans" />
 

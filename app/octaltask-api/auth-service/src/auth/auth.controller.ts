@@ -7,7 +7,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @GrpcMethod('AuthService', 'Login')
   async login(loginDto: LoginDto) {
@@ -26,7 +26,7 @@ export class AuthController {
       if (signupDto.password.length < 8) {
         throw new RpcException('Password must be at least 8 characters long');
       }
-      
+
       const result = await this.authService.signup(signupDto);
       return { message: 'User created successfully', user: result };
     } catch (error) {
@@ -50,7 +50,7 @@ export class AuthController {
       if (resetPasswordDto.newPassword.length < 8) {
         throw new RpcException('Password must be at least 8 characters long');
       }
-      
+
       return await this.authService.resetPassword(resetPasswordDto);
     } catch (error) {
       throw new RpcException(error.message || 'Password reset failed');

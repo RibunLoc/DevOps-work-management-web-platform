@@ -1,10 +1,11 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateCommentDto {
   @ApiProperty({
-    description: 'Updated content of the comment',
-    example: 'This is the updated comment text'
+    example: 'Updated comment content',
+    description: 'New content for the comment',
+    required: true
   })
   @IsString()
   @IsNotEmpty()

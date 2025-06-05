@@ -9,10 +9,9 @@ export interface Comment {
   taskId: string;
   userId: string;
   userName: string;
-  userPhotoUrl?: string;
+  //userPhotoUrl?: string;
   content: string;
   createdAt: string;
-  updatedAt?: string;
 }
 
 export interface SharedUser {
@@ -42,10 +41,10 @@ export interface Task {
   notes?: string;
   isStarred?: boolean;
   listId?: string;  // For organizing into lists
-  position?: number; // For ordering tasks in a list
+  // position?: number; // For ordering tasks in a list
   subtasks?: SubTask[]; // For adding subtasks
-  createdAt: string;
-  updatedAt: string;
+  // createdAt: string;
+  // updatedAt: string;
   assignedTo?: string; // UserID of person assigned to task
   sharedWith?: SharedUser[]; // Users that have access to this task
   comments?: Comment[]; // Comments on the task

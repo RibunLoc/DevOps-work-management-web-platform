@@ -1,7 +1,10 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Task, TaskList, Comment, Attachment } from '@/types/task';
 import { useUser } from './UserContext';
-
+import {createList, getLists, getListsById,  updateListById, deleteListById} from '@/lib/api/tasks';
+import { createTask, getTasks, getTaskById, updateTaskById, deleteTaskById } from '@/lib/api/tasks';
+import { getSubtasksByTaskId } from '@/lib/api/tasks';
+import { getCommentsByTaskId } from '@/lib/api/tasks';
 interface TaskContextType {
     tasks: Task[];
     lists: TaskList[];
@@ -61,141 +64,262 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     const [error, setError] = useState<string | null>(null);
 
     // Load initial data from localStorage or mock API
+    // useEffect(() => {
+    //     const loadData = async () => {
+    //         try {
+    //             // test by using  localStorage or create initial data
+    //             const storedTasks = localStorage.getItem('octalTasks');
+    //             const storedLists = localStorage.getItem('octalLists');
+
+    //             if (storedTasks) {
+    //                 setTasks(JSON.parse(storedTasks));
+    //             } else {
+    //                 // Set default tasks for demo
+    //                 const defaultTasks: Task[] = [
+    //                     {
+    //                         id: '1',
+    //                         title: 'Complete project proposal',
+    //                         completed: false,
+    //                         createdAt: new Date().toISOString(),
+    //                         updatedAt: new Date().toISOString(),
+    //                         listId: '1',
+    //                         comments: [],
+    //                     },
+    //                     {
+    //                         id: '2',
+    //                         title: 'Schedule team meeting',
+    //                         completed: true,
+    //                         createdAt: new Date().toISOString(),
+    //                         updatedAt: new Date().toISOString(),
+    //                         listId: '1',
+    //                         comments: [],
+    //                     },
+    //                     {
+    //                         id: '3',
+    //                         title: 'Research new technologies',
+    //                         completed: false,
+    //                         createdAt: new Date().toISOString(),
+    //                         updatedAt: new Date().toISOString(),
+    //                         listId: '2',
+    //                         dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    //                         comments: [],
+    //                     },
+    //                 ];
+    //                 setTasks(defaultTasks);
+    //                 localStorage.setItem('octalTasks', JSON.stringify(defaultTasks));
+    //             }
+
+    //             if (storedLists) {
+    //                 setLists(JSON.parse(storedLists));
+    //             } else {
+    //                 // Set default lists for demo
+    //                 const defaultLists: TaskList[] = [
+    //                     {
+    //                         id: '1',
+    //                         name: 'Work',
+    //                         color: 'blue',
+    //                         ownerId: currentUser?.id || '1',
+    //                     },
+    //                     {
+    //                         id: '2',
+    //                         name: 'Personal',
+    //                         color: 'green',
+    //                         ownerId: currentUser?.id || '1',
+    //                     },
+    //                 ];
+    //                 setLists(defaultLists);
+    //                 localStorage.setItem('octalLists', JSON.stringify(defaultLists));
+    //             }
+    //         } catch (err) {
+    //             setError('Failed to load data');
+    //             console.error(err);
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     };
+
+    //     loadData();
+    // }, [currentUser?.id]);
+
     useEffect(() => {
-        const loadData = async () => {
-            try {
-                // test by using  localStorage or create initial data
-                const storedTasks = localStorage.getItem('octalTasks');
-                const storedLists = localStorage.getItem('octalLists');
+    const loadData = async () => {
+        try {
+            // get tasks
+            const fetchedTasks = await getTasks();
 
-                if (storedTasks) {
-                    setTasks(JSON.parse(storedTasks));
-                } else {
-                    // Set default tasks for demo
-                    const defaultTasks: Task[] = [
-                        {
-                            id: '1',
-                            title: 'Complete project proposal',
-                            completed: false,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString(),
-                            listId: '1',
-                            comments: [],
-                        },
-                        {
-                            id: '2',
-                            title: 'Schedule team meeting',
-                            completed: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString(),
-                            listId: '1',
-                            comments: [],
-                        },
-                        {
-                            id: '3',
-                            title: 'Research new technologies',
-                            completed: false,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString(),
-                            listId: '2',
-                            dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                            comments: [],
-                        },
-                    ];
-                    setTasks(defaultTasks);
-                    localStorage.setItem('octalTasks', JSON.stringify(defaultTasks));
-                }
+            
+    //         const mappedTasks = fetchedTasks.tasks.map((task: any) => ({
+    //             id: task.id.toString(),
+    //             title: task.title,
+    //             completed: task.isCompleted,
+    //             dueDate: task.dueDate   ? new Date(task.dueDate).toISOString().split('T')[0]: undefined,
+    //             notes: task.description || '',
+    //             isStarred: task.isStarred,
+    //             listId: task.listId?.toString(),  // cần đúng tên listId
+    //             subtasks: [],
+    //             assignedTo: undefined,
+    //             sharedWith: [],
+    //             comments: [],
+    //             attachments: [],
+    //         }));
 
-                if (storedLists) {
-                    setLists(JSON.parse(storedLists));
-                } else {
-                    // Set default lists for demo
-                    const defaultLists: TaskList[] = [
-                        {
-                            id: '1',
-                            name: 'Work',
-                            color: 'blue',
-                            ownerId: currentUser?.id || '1',
-                        },
-                        {
-                            id: '2',
-                            name: 'Personal',
-                            color: 'green',
-                            ownerId: currentUser?.id || '1',
-                        },
-                    ];
-                    setLists(defaultLists);
-                    localStorage.setItem('octalLists', JSON.stringify(defaultLists));
-                }
-            } catch (err) {
-                setError('Failed to load data');
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
+    //   setTasks(mappedTasks);
+            
+            const mappedTasks = await Promise.all(fetchedTasks.tasks.map(async (task: any) => {
+                    let subtasksData: any = {};
+                    let commentsData: any = {};
 
-        loadData();
-    }, [currentUser?.id]);
+                    try {
+                        subtasksData = await getSubtasksByTaskId(task.id);
+                    } catch (err) {
+                        console.error(`Failed to fetch subtasks for task ${task.id}`, err);
+                    }
 
-    // Save data to localStorage whenever it changes
-    useEffect(() => {
-        if (!loading && tasks.length > 0) {
-            localStorage.setItem('octalTasks', JSON.stringify(tasks));
+                    try {
+                        commentsData = await getCommentsByTaskId(task.id);
+                    } catch (err) {
+                        console.error(`Failed to fetch comments for task ${task.id}`, err);
+                    }
+
+                    return {
+                        id: task.id.toString(),
+                        title: task.title,
+                        completed: task.isCompleted,
+                        dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : undefined,
+                        notes: task.description || '',
+                        isStarred: task.isStarred,
+                        listId: task.listId?.toString(),
+                        subtasks: Array.isArray(subtasksData?.subtasks) ? subtasksData.subtasks.map((subtask: any) => ({
+                            id: subtask.id.toString(),
+                            title: subtask.content,
+                            isCompleted: subtask.isCompleted,
+                        })) : [],
+                        comments: Array.isArray(commentsData?.comments) ? commentsData.comments.map((comment: any) => ({
+                            id: comment.id.toString(),
+                            content: comment.content,
+                            taskId: task.id.toString(),
+                            userId: comment.user?.userId?.toString(),
+                            createdAt: comment.createdAt,
+                            userName: comment.user?.email || 'Unknown',  
+                            //userPhotoUrl: comment.user?.photoUrl || '',  
+                        })) : [],
+                        assignedTo: undefined,
+                        sharedWith: [],
+                        attachments: [],
+                    };
+                }));
+
+
+            setTasks(mappedTasks);
+
+            
+            // get lists
+            const fetchedLists = await getLists();
+            const mappedLists = fetchedLists.lists.map((list: any) => ({
+                id: list.id.toString(),
+                name: list.name,
+                color: list.color,
+                icon: list.icon,
+                ownerId: list.user?.email,
+                isShared: false, // giả định, vì chưa có isShared từ API
+                sharedWith: []   // giả định trống vì chưa được trả về
+            }));
+            setLists(mappedLists);
+        } catch (err) {
+            setError('Failed to load data from API');
+            console.error(err);
+        } finally {
+            setLoading(false);
         }
-    }, [tasks, loading]);
+    };
 
-    useEffect(() => {
-        if (!loading && lists.length > 0) {
-            localStorage.setItem('octalLists', JSON.stringify(lists));
-        }
-    }, [lists, loading]);
+    loadData();
+}, []);
+
+
+    // // Save data to localStorage whenever it changes
+    // useEffect(() => {
+    //     if (!loading && tasks.length > 0) {
+    //         localStorage.setItem('octalTasks', JSON.stringify(tasks));
+    //     }
+    // }, [tasks, loading]);
+
+    // useEffect(() => {
+    //     if (!loading && lists.length > 0) {
+    //         localStorage.setItem('octalLists', JSON.stringify(lists));
+    //     }
+    // }, [lists, loading]);
 
     // Task operations
     const addTask = async (taskData: Partial<Task>): Promise<Task> => {
-        // Commenting out the auth check for now
-        // if (!currentUser) throw new Error('User must be logged in');
+        if (!taskData.title || !taskData.listId) {
+            throw new Error('Missing task title or listId');
+        }
+
+        const createdTask = await createTask(
+            taskData.title,
+            taskData.listId,
+            taskData.notes || '',      // use notes as description
+            taskData.dueDate           // may undefined
+        );
 
         const newTask: Task = {
-            id: Date.now().toString(),
-            title: taskData.title || 'New Task',
-            completed: taskData.completed || false,
-            listId: taskData.listId,
-            dueDate: taskData.dueDate,
-            notes: taskData.notes,
-            subtasks: taskData.subtasks || [],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            assignedTo: taskData.assignedTo,
-            sharedWith: taskData.sharedWith || [],
+            id: createdTask.id.toString(),
+            title: createdTask.title,
+            completed: createdTask.isCompleted || false,
+            listId: createdTask.listId.toString(),
+            dueDate: createdTask.dueDate || undefined,
+            notes: createdTask.description || '',
+            isStarred: false,
+            assignedTo: undefined,
+            subtasks: [],
             comments: [],
-            questions: []
+            sharedWith: [],
         };
 
         setTasks(prevTasks => [...prevTasks, newTask]);
         return newTask;
-    };
+        };
+
 
     const updateTask = async (taskId: string, updates: Partial<Task>): Promise<Task> => {
-        const updatedTasks = tasks.map(task =>
-            task.id === taskId
-                ? { ...task, ...updates, updatedAt: new Date().toISOString() }
-                : task
+        const updatePayload = {
+            title: updates.title,
+            description: updates.notes,
+            isCompleted: updates.completed,
+            dueDate: updates.dueDate,
+            listId: updates.listId ? parseInt(updates.listId) : undefined,
+        };
+
+        const updatedData = await updateTaskById(taskId, updatePayload);
+
+        const updatedTask: Task = {
+            id: updatedData.id.toString(),
+            title: updatedData.title,
+            completed: updatedData.isCompleted,
+            listId: updatedData.listId.toString(),
+            dueDate: updatedData.dueDate || undefined,
+            notes: updatedData.description || '',
+            isStarred: false,
+            assignedTo: undefined,
+            subtasks: [],
+            comments: [],
+            sharedWith: [],
+        };
+
+        setTasks(prev =>
+            prev.map(task => (task.id === taskId ? updatedTask : task))
         );
 
-        setTasks(updatedTasks);
-        const updatedTask = updatedTasks.find(t => t.id === taskId);
-
-        if (!updatedTask) {
-            throw new Error('Task not found');
-        }
-
         return updatedTask;
-    };
+        };
 
-    const deleteTask = async (taskId: string): Promise<void> => {
-        setTasks(tasks.filter(task => task.id !== taskId));
-    };
+
+   const deleteTask = async (taskId: string): Promise<void> => {
+        await deleteTaskById(taskId);
+        setTasks(prev => prev.filter(task => task.id !== taskId));
+        };
+
 
     const getTasksByList = (listId: string): Task[] => {
         return tasks.filter(task => task.listId === listId);
@@ -223,46 +347,112 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     };
 
     // List operations
+    // const addList = async (listData: Partial<TaskList>): Promise<TaskList> => {
+    //     // Commenting out the auth check for now
+    //     // if (!currentUser) throw new Error('User must be logged in');
+
+    //     const newList: TaskList = {
+    //         id: Date.now().toString(),
+    //         name: listData.name || 'New List',
+    //         color: listData.color || 'blue',
+    //         icon: listData.icon,
+    //         ownerId: currentUser?.id || 'default-owner',
+    //         isShared: false,
+    //         sharedWith: []
+    //     };
+
+    //     setLists(prevLists => [...prevLists, newList]);
+    //     return newList;
+    // };
+
     const addList = async (listData: Partial<TaskList>): Promise<TaskList> => {
-        // Commenting out the auth check for now
-        // if (!currentUser) throw new Error('User must be logged in');
+    try {
+        if (!listData.name || !listData.icon || !listData.color) {
+            throw new Error('Missing list information');
+        }
+
+        const createdList = await createList(listData.name, listData.icon, listData.color);
 
         const newList: TaskList = {
-            id: Date.now().toString(),
-            name: listData.name || 'New List',
-            color: listData.color || 'blue',
-            icon: listData.icon,
-            ownerId: currentUser?.id || 'default-owner',
+            id: createdList.id.toString(),
+            name: createdList.name,
+            icon: createdList.icon,
+            color: createdList.color,
+            ownerId: createdList.user?.email,
             isShared: false,
             sharedWith: []
         };
 
-        setLists(prevLists => [...prevLists, newList]);
+        setLists(prev => [...prev, newList]);
         return newList;
-    };
+    } catch (error) {
+        console.error('Failed to create list:', error);
+        throw error;
+    }
+};
+
+
+    // const updateList = async (listId: string, updates: Partial<TaskList>): Promise<TaskList> => {
+    //     const updatedLists = lists.map(list =>
+    //         list.id === listId ? { ...list, ...updates } : list
+    //     );
+
+    //     setLists(updatedLists);
+    //     const updatedList = updatedLists.find(l => l.id === listId);
+
+    //     if (!updatedList) {
+    //         throw new Error('List not found');
+    //     }
+
+    //     return updatedList;
+    // };
 
     const updateList = async (listId: string, updates: Partial<TaskList>): Promise<TaskList> => {
+    try {
+        const updatedData = await updateListById(listId, updates); // Gọi API PATCH
+
         const updatedLists = lists.map(list =>
-            list.id === listId ? { ...list, ...updates } : list
+            list.id === listId ? { ...list, ...updatedData } : list
         );
 
         setLists(updatedLists);
-        const updatedList = updatedLists.find(l => l.id === listId);
 
+        const updatedList = updatedLists.find(l => l.id === listId);
         if (!updatedList) {
-            throw new Error('List not found');
+            throw new Error('List not found after update');
         }
 
         return updatedList;
-    };
+    } catch (error) {
+        console.error('Error updating list:', error);
+        throw error;
+    }
+};
+
+
+    // const deleteList = async (listId: string): Promise<void> => {
+    //     setLists(lists.filter(list => list.id !== listId));
+    //     // Also delete or update tasks in that list
+    //     setTasks(tasks.map(task =>
+    //         task.listId === listId ? { ...task, listId: undefined } : task
+    //     ));
+    // };
 
     const deleteList = async (listId: string): Promise<void> => {
-        setLists(lists.filter(list => list.id !== listId));
-        // Also delete or update tasks in that list
-        setTasks(tasks.map(task =>
+    try {
+        await deleteListById(listId); // Gọi API DELETE
+
+        // Cập nhật local state
+        setLists(prev => prev.filter(list => list.id !== listId));
+        setTasks(prev => prev.map(task =>
             task.listId === listId ? { ...task, listId: undefined } : task
         ));
-    };
+    } catch (error) {
+        console.error('Error deleting list:', error);
+        throw error;
+    }
+};
+
 
     // Sharing operations
     const shareTask = async (task: Task, email: string, role: 'viewer' | 'editor' | 'admin'): Promise<Task> => {
@@ -408,10 +598,9 @@ export function TaskProvider({ children }: { children: ReactNode }) {
                 id: `comment-${Date.now()}`,
                 taskId,
                 userId: currentUser?.id || 'anonymous',
-                userName: currentUser?.name || 'Anonymous User',
-                userPhotoUrl: currentUser?.photoUrl,
                 content,
-                createdAt: new Date().toISOString()
+                createdAt: new Date().toISOString(),
+                userName: '',
             };
 
             // Update the task with the new comment

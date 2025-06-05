@@ -20,6 +20,16 @@ module "aws_load_balancer_controller_irsa_role" {
   }
 }
 
+resource "kubernetes_service_account" "aws-lb_sa" {
+  metadata {
+    name     = "aws-load-balancer-controller"
+    namespace = "kube-system"
+    annotations = {
+      "eks.amazonaws.com/role-arn" = module.aws_load_balancer_controller_irsa_role.iam_role_arn
+    }
+  }
+}
+
 resource "helm_release" "aws-load-balancer-controller" {
   name       = "aws-load-balancer-controller"
   repository = "https://aws.github.io/eks-charts"
@@ -30,7 +40,8 @@ resource "helm_release" "aws-load-balancer-controller" {
 
   depends_on = [ 
     module.aws_load_balancer_controller_irsa_role,
-    aws_iam_openid_connect_provider.eks
+    aws_iam_openid_connect_provider.eks,
+    kubernetes_service_account.aws-lb_sa
    ]
 
   set {
@@ -44,12 +55,22 @@ resource "helm_release" "aws-load-balancer-controller" {
   }
 
   set {
-    name  = "serviceAccount.name"
-    value = "false" # Vì đã tạo ra IRSA role và SA thủ công: aws-load-balancer-controller 
+    name  = "region"
+    value = var.region
   }
 
   set {
-    name = "serviceAccount.annotations.eks\\.amazonaws.com\\.com/role-arn"
-    value = module.aws_load_balancer_controller_irsa_role.iam_role_arn
+    name  = "vpcId"
+    value = aws_eks_cluster.eks-cluster.vpc_config[0].vpc_id
+  }
+
+  set {
+    name  = "serviceAccount.name"
+    value = kubernetes_service_account.aws-lb_sa.metadata[0].name 
+  }
+
+  set {
+    name = "serviceAccount.create"
+    value = false
   }
 }

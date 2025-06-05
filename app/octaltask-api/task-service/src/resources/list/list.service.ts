@@ -1,8 +1,9 @@
-// src/task/list.service.ts (Task Microservice)
 import { Injectable, NotFoundException, ForbiddenException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not } from 'typeorm';
 import { List } from '../../entities/list.entity';
+import { ListShared, SharedRole } from '../../entities/list-shared.entity';
+import { User } from '../../entities/user.entity';
 import { CreateListDto } from './dto/create-list.dto';
 import { UpdateListDto } from './dto/update-list.dto';
 
@@ -17,7 +18,36 @@ export class ListService {
   constructor(
     @InjectRepository(List)
     private listRepository: Repository<List>,
-  ) {}
+    @InjectRepository(ListShared)
+    private listSharedRepository: Repository<ListShared>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+  ) { }
+
+  // Helper method để check quyền truy cập
+  private async checkListAccess(listId: number, userId: number): Promise<{ list: List; userRole: string }> {
+    const list = await this.listRepository.findOne({
+      where: { id: listId },
+      relations: ['user', 'sharedUsers', 'sharedUsers.user']
+    });
+
+    if (!list) {
+      throw new NotFoundException(`List with ID ${listId} not found`);
+    }
+
+    // Check if user is owner
+    if (list.user.id === userId) {
+      return { list, userRole: 'owner' };
+    }
+
+    // Check if user has shared access
+    const sharedAccess = list.sharedUsers?.find(shared => shared.user.id === userId);
+    if (sharedAccess) {
+      return { list, userRole: sharedAccess.role };
+    }
+
+    throw new ForbiddenException('You do not have permission to access this list');
+  }
 
   async createList(createListDto: CreateListDto, user: TaskUser): Promise<List | null> {
     // Check if list with same name already exists for this user
@@ -32,8 +62,6 @@ export class ListService {
       throw new ConflictException('List with this name already exists');
     }
 
-    
-console.log('CreateListDto:', createListDto);
     const list = this.listRepository.create({
       name: createListDto.name,
       icon: createListDto.icon || 'default',
@@ -44,58 +72,87 @@ console.log('CreateListDto:', createListDto);
     });
 
     const savedList = await this.listRepository.save(list);
-    
-    // Return list with user information
+
     return await this.listRepository.findOne({
       where: { id: savedList.id },
-      relations: ['user'],
+      relations: ['user', 'sharedUsers', 'sharedUsers.user'],
     });
   }
 
-  async findAllList(user: TaskUser): Promise<{ lists: List[] }> {
-    const lists = await this.listRepository.find({
+  async findAllList(user: TaskUser): Promise<{ lists: any[] }> {
+    // Get owned lists
+    const ownedLists = await this.listRepository.find({
       where: {
         user: { id: user.userId }
       },
-      relations: ['user', 'tasks'],
+      relations: ['user', 'tasks', 'sharedUsers', 'sharedUsers.user'],
       order: {
         id: 'DESC'
       }
     });
 
-    return { lists };
-  }
-
-  async findOneList(id: number, user: TaskUser): Promise<List> {
-    const list = await this.listRepository.findOne({
-      where: { id },
-      relations: ['user', 'tasks']
+    // Get shared lists
+    const sharedListsData = await this.listSharedRepository.find({
+      where: {
+        user: { id: user.userId }
+      },
+      relations: ['list', 'list.user', 'list.tasks', 'list.sharedUsers', 'list.sharedUsers.user']
     });
 
-    if (!list) {
-      throw new NotFoundException(`List with ID ${id} not found`);
-    }
+    const sharedLists = sharedListsData.map(shared => ({
+      ...shared.list,
+      userRole: shared.role
+    }));
 
-    // Check if user owns this list
-    if (list.user.id !== user.userId) {
-      throw new ForbiddenException('You do not have permission to access this list');
-    }
+    // Combine and format lists
+    const allLists = [
+      ...ownedLists.map(list => ({
+        ...list,
+        userRole: 'owner',
+        sharedUsers: list.sharedUsers?.map(shared => ({
+          userId: shared.user.id,
+          email: shared.user.email,
+          name: shared.user.name,
+          role: shared.role,
+          sharedAt: shared.createdAt
+        })) || []
+      })),
+      ...sharedLists.map(list => ({
+        ...list,
+        sharedUsers: list.sharedUsers?.map(shared => ({
+          userId: shared.user.id,
+          email: shared.user.email,
+          name: shared.user.name,
+          role: shared.role,
+          sharedAt: shared.createdAt
+        })) || []
+      }))
+    ];
 
-    return list;
+    return { lists: allLists };
   }
 
-  async updateList(id: number, updateListDto: UpdateListDto, user: TaskUser): Promise<List|null> {
-    const list = await this.listRepository.findOne({
-      where: { id },
-      relations: ['user']
-    });
+  async findOneList(id: number, user: TaskUser): Promise<any> {
+    const { list, userRole } = await this.checkListAccess(id, user.userId);
 
-    if (!list) {
-      throw new NotFoundException(`List with ID ${id} not found`);
-    }
+    return {
+      ...list,
+      userRole,
+      sharedUsers: list.sharedUsers?.map(shared => ({
+        userId: shared.user.id,
+        email: shared.user.email,
+        name: shared.user.name,
+        role: shared.role,
+        sharedAt: shared.createdAt
+      })) || []
+    };
+  }
 
-    // Check if user owns this list
-    if (list.user.id !== user.userId) {
+  async updateList(id: number, updateListDto: UpdateListDto, user: TaskUser): Promise<any> {
+    const { list, userRole } = await this.checkListAccess(id, user.userId);
+
+    // Check permissions for update
+    if (userRole !== 'owner' && userRole !== SharedRole.ADMIN && userRole !== SharedRole.EDITOR) {
       throw new ForbiddenException('You do not have permission to update this list');
     }
 
@@ -104,8 +161,8 @@ console.log('CreateListDto:', createListDto);
       const existingList = await this.listRepository.findOne({
         where: {
           name: updateListDto.name,
-          user: { id: user.userId },
-          id: Not(id) // Exclude current list from check
+          user: { id: list.user.id },
+          id: Not(id)
         }
       });
 
@@ -130,26 +187,18 @@ console.log('CreateListDto:', createListDto);
 
     const updatedList = await this.listRepository.save(list);
 
-    // Return updated list with relations
     return await this.listRepository.findOne({
       where: { id: updatedList.id },
-      relations: ['user', 'tasks']
+      relations: ['user', 'tasks', 'sharedUsers', 'sharedUsers.user']
     });
   }
 
   async removeList(id: number, user: TaskUser): Promise<{ message: string }> {
-    const list = await this.listRepository.findOne({
-      where: { id },
-      relations: ['user', 'tasks']
-    });
+    const { list, userRole } = await this.checkListAccess(id, user.userId);
 
-    if (!list) {
-      throw new NotFoundException(`List with ID ${id} not found`);
-    }
-
-    // Check if user owns this list
-    if (list.user.id !== user.userId) {
-      throw new ForbiddenException('You do not have permission to delete this list');
+    // Only owner can delete list
+    if (userRole !== 'owner') {
+      throw new ForbiddenException('Only the list owner can delete this list');
     }
 
     // Check if list has tasks
@@ -158,65 +207,151 @@ console.log('CreateListDto:', createListDto);
     }
 
     await this.listRepository.remove(list);
-
     return { message: 'List deleted successfully' };
   }
 
-  // Additional utility methods
-  async getListWithTaskCount(user: TaskUser): Promise<Array<List & { taskCount: number; completedTaskCount: number }>> {
-    const lists = await this.listRepository
-      .createQueryBuilder('list')
-      .leftJoinAndSelect('list.user', 'user')
-      .leftJoin('list.tasks', 'task')
-      .addSelect('COUNT(task.id)', 'taskCount')
-      .addSelect('SUM(CASE WHEN task.isCompleted = true THEN 1 ELSE 0 END)', 'completedTaskCount')
-      .where('list.user.id = :userId', { userId: user.userId })
-      .groupBy('list.id')
-      .addGroupBy('user.id')
-      .getRawAndEntities();
+  // New sharing methods
+  async shareList(listId: number, email: string, role: SharedRole, user: TaskUser): Promise<{ message: string }> {
+    const { list, userRole } = await this.checkListAccess(listId, user.userId);
 
-    return lists.entities.map((list, index) => ({
-      ...list,
-      taskCount: parseInt(lists.raw[index].taskCount) || 0,
-      completedTaskCount: parseInt(lists.raw[index].completedTaskCount) || 0
+    // Only owner and admin can share list
+    if (userRole !== 'owner' && userRole !== SharedRole.ADMIN) {
+      throw new ForbiddenException('You do not have permission to share this list');
+    }
+
+    // Find user by email
+    const targetUser = await this.userRepository.findOne({
+      where: { email }
+    });
+
+    if (!targetUser) {
+      throw new NotFoundException('User with this email not found');
+    }
+
+    // Check if user is already owner
+    if (targetUser.id === list.user.id) {
+      throw new ConflictException('Cannot share list with the owner');
+    }
+
+    // Check if already shared
+    const existingShare = await this.listSharedRepository.findOne({
+      where: {
+        list: { id: listId },
+        user: { id: targetUser.id }
+      }
+    });
+
+    if (existingShare) {
+      throw new ConflictException('List is already shared with this user');
+    }
+
+    // Create share record
+    const listShared = this.listSharedRepository.create({
+      list: { id: listId },
+      user: { id: targetUser.id },
+      role,
+      sharedBy: user.userId
+    });
+
+    await this.listSharedRepository.save(listShared);
+
+    return { message: 'List shared successfully' };
+  }
+
+  async getSharedLists(user: TaskUser): Promise<{ lists: any[] }> {
+    const sharedListsData = await this.listSharedRepository.find({
+      where: {
+        user: { id: user.userId }
+      },
+      relations: ['list', 'list.user', 'list.tasks', 'list.sharedUsers', 'list.sharedUsers.user']
+    });
+
+    const lists = sharedListsData.map(shared => ({
+      ...shared.list,
+      userRole: shared.role,
+      sharedUsers: shared.list.sharedUsers?.map(sharedUser => ({
+        userId: sharedUser.user.id,
+        email: sharedUser.user.email,
+        name: sharedUser.user.name,
+        role: sharedUser.role,
+        sharedAt: sharedUser.createdAt
+      })) || []
     }));
+
+    return { lists };
   }
 
-  async getListsByType(type: string, user: TaskUser): Promise<List[]> {
-    return await this.listRepository.find({
+  async getListSharedUsers(listId: number, user: TaskUser): Promise<{ sharedUsers: any[] }> {
+    const { list } = await this.checkListAccess(listId, user.userId);
+
+    const sharedUsers = list.sharedUsers?.map(shared => ({
+      userId: shared.user.id,
+      email: shared.user.email,
+      name: shared.user.name,
+      role: shared.role,
+      sharedAt: shared.createdAt
+    })) || [];
+
+    return { sharedUsers };
+  }
+
+  async updateSharedRole(listId: number, targetUserId: number, role: SharedRole, user: TaskUser): Promise<{ message: string }> {
+    const { userRole } = await this.checkListAccess(listId, user.userId);
+
+    // Only owner and admin can update roles
+    if (userRole !== 'owner' && userRole !== SharedRole.ADMIN) {
+      throw new ForbiddenException('You do not have permission to update shared roles');
+    }
+
+    const sharedRecord = await this.listSharedRepository.findOne({
       where: {
-        icon: type as any,
-        user: { id: user.userId }
-      },
-      relations: ['user', 'tasks'],
-      order: {
-        name: 'ASC'
+        list: { id: listId },
+        user: { id: targetUserId }
       }
     });
+
+    if (!sharedRecord) {
+      throw new NotFoundException('Shared user not found');
+    }
+
+    sharedRecord.role = role;
+    await this.listSharedRepository.save(sharedRecord);
+
+    return { message: 'Role updated successfully' };
   }
 
-  async getListsByColor(color: string, user: TaskUser): Promise<List[]> {
-    return await this.listRepository.find({
+  async removeSharedUser(listId: number, targetUserId: number, user: TaskUser): Promise<{ message: string }> {
+    const { userRole } = await this.checkListAccess(listId, user.userId);
+
+    // Owner, admin can remove anyone; user can remove themselves
+    if (userRole !== 'owner' && userRole !== SharedRole.ADMIN && user.userId !== targetUserId) {
+      throw new ForbiddenException('You do not have permission to remove this user');
+    }
+
+    const sharedRecord = await this.listSharedRepository.findOne({
       where: {
-        color: color as any,
-        user: { id: user.userId }
-      },
-      relations: ['user', 'tasks'],
-      order: {
-        name: 'ASC'
+        list: { id: listId },
+        user: { id: targetUserId }
       }
     });
+
+    if (!sharedRecord) {
+      throw new NotFoundException('Shared user not found');
+    }
+
+    await this.listSharedRepository.remove(sharedRecord);
+
+    return { message: 'User removed from list successfully' };
   }
 
-  async getOverdueLists(user: TaskUser): Promise<List[]> {
-    const now = new Date();
-    return await this.listRepository
-      .createQueryBuilder('list')
-      .leftJoinAndSelect('list.user', 'user')
-      .leftJoinAndSelect('list.tasks', 'tasks')
-      .where('list.user.id = :userId', { userId: user.userId })
-      .andWhere('list.dueDate < :now', { now })
-      .orderBy('list.dueDate', 'ASC')
+  async getUsersByEmail(email: string): Promise<{ users: any[] }> {
+    const users = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.email LIKE :email', { email: `%${email}%` })
+      .select(['user.id', 'user.email', 'user.name'])
+      .limit(10)
       .getMany();
+
+    return { users };
   }
 }

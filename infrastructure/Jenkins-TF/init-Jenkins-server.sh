@@ -30,7 +30,8 @@ sudo wget https://github.com/jenkinsci/plugin-installation-manager-tool/releases
 java -jar jenkins-plugin-manager.jar --plugin-download-directory ./plugins \
   --plugins adoptopenjdk sonar nodejs docker-plugin docker-commons docker-workflow \
   docker-java-api docker-build-step dependency-check-jenkins-plugin terraform aws-credentials \
-  pipeline-aws snyk-security-scanner golang github-pullrequest github-api github
+  pipeline-aws snyk-security-scanner golang github-pullrequest github-api github hashicorp-vault-plugin \
+  hashicorp-vault-pipeline
 
 sudo cp ./plugins/*.jpi /var/lib/jenkins/plugins/
 sudo chown jenkins:jenkins /var/lib/jenkins/plugins/*.jpi

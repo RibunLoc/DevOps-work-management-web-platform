@@ -113,18 +113,33 @@ export default function TaskDashboard() {
     //   const pendingTasks = totalTasks - completedTasks;
 
     // Sort tasks based on option
-    const sortedTasks = [...filteredTasks].sort((a, b) => {
-        if (sortOption === 'date-desc') {
-            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    // const sortedTasks = [...filteredTasks].sort((a, b) => {
+    //     if (sortOption === 'date-desc') {
+    //         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
 
-        } else if (sortOption === 'date-asc') {
-            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-        } else if (sortOption === 'alpha-asc') {
-            return a.title.localeCompare(b.title);
-        } else {
-            return b.title.localeCompare(a.title);
-        }
-    });
+    //     } else if (sortOption === 'date-asc') {
+    //         return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    //     } else if (sortOption === 'alpha-asc') {
+    //         return a.title.localeCompare(b.title);
+    //     } else {
+    //         return b.title.localeCompare(a.title);
+    //     }
+    // });
+
+    const sortedTasks = [...filteredTasks].sort((a, b) => {
+            if (sortOption === 'date-desc') {
+                // Sắp xếp theo ID giảm dần (ID lớn hơn trước)
+                return Number(b.id) - Number(a.id);
+            } else if (sortOption === 'date-asc') {
+                // Sắp xếp theo ID tăng dần (ID nhỏ hơn trước)
+                return Number(a.id) - Number(b.id);
+            } else if (sortOption === 'alpha-asc') {
+                return a.title.localeCompare(b.title);
+            } else {
+                return b.title.localeCompare(a.title);
+            }
+        });
+
 
     const handleEditTask = (task: Task) => {
         setSelectedTask(task);
@@ -382,7 +397,7 @@ export default function TaskDashboard() {
 
     return (
         <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
-            <header className="top-0 bg-white border-b border-gray-200  dark:bg-gray-800 dark:border-gray-700">
+            <header className="top-0 bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
                 <div className="px-4 py-2.5 flex justify-between items-center">
                     <div className="flex items-center gap-3 ">
                         <button
