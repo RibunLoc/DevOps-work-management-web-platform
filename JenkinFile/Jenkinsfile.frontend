@@ -5,7 +5,7 @@ pipeline {
     parameters {
         string(name: 'TAG_NAME', defaultValue: 'v1.0', description: 'Đây là tag mà bạn muốn gán chi image Docker')
         string(name: 'NAME_DOCKER', defaultValue: 'ribun', description: 'Tên của docker mà bạn sử dụng để lưu trữ image')
-        string(name: 'NAME_IMAGE', defaultValue: 'TaskManagement_Frontend', description: 'Tên của image Docker mà bạn muốn tạo')
+        string(name: 'NAME_IMAGE', defaultValue: 'taskmanagement_frontend', description: 'Tên của image Docker mà bạn muốn tạo')
     }
     // Khai báo các biến môi trường cần thiết
     environment {
@@ -68,7 +68,7 @@ pipeline {
                 dir('app/octaltask') {
                     script {
                         withCredentials([
-                                string(credentialsId: 'snyk-token', variable: 'SNYK_TOKEN')
+                                string(credentialsId: 'snyk', variable: 'SNYK_TOKEN')
                         ]) {
                             sh '''
                                 mkdir -p reports/snyk
@@ -131,23 +131,32 @@ pipeline {
         // Chạy container mới từ image đã đẩy lên kho chứa
         stage('Run container'){
             steps{
-                vault(
-                    vaultSecrets: [
-                        [path: 'secrets/frontend/api', secretValues: [
-                            [envVar: 'VITE_API_BASE', vaultKey: 'VITE_API_BASE']
-                        ]]
+                script {
+                    def mySecrets = [
+                        [
+                            path: 'secrets/frontend/api',
+                            engineVersion: 1,
+                            secretValues: [
+                                [envVar: 'VITE_API_BASE', vaultKey: 'VITE_API_BASE']
+                            ]
+                        ]
                     ]
-                )
-                withCredentials([
-                    file(credentialsId: 'docker-config', variable: 'DOCKER_CONFIG')
-                ]) {
-                    sh """
-                        echo "VITE_API_BASE=${VITE_API_BASE}" > .env
-                        docker run -d --name ${params.NAME_IMAGE} \
-                        --env-file .env \
-                        -p 8000:80 ${REPO_IMAGE}
-                        rm -rf .env
-                    """
+                    def configuration = [
+                        vaultUrl: 'http://vault.netsena.io.vn:8200',
+                        vaultCredentialId: 'vault-jenkins-role',
+                        engineVersion: 1
+                    ]
+                    withVault(
+                        [configuration: configuration, vaultSecrets: mySecrets]
+                    ){
+                        sh """
+                            echo "VITE_API_BASE=${VITE_API_BASE}" > .env
+                            docker run -d --name ${params.NAME_IMAGE} \
+                            --env-file .env \
+                            -p 5173:5173 ${REPO_IMAGE}
+                            rm -rf .env
+                        """
+                    }
                 }
             }
         }
