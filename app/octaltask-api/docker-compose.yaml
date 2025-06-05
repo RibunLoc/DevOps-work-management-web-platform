@@ -48,7 +48,7 @@ services:
       args:
         SERVICE: user-service
         PORT: ${USER_PORT}
-    image: ribun/octaltask-backe-user-service:${TAG:-dev}
+    image: ribun/octaltask-backend-user-service:${TAG:-dev}
     container_name: octaltask-backend-user-service
     ports:
       - "${USER_PORT}:${USER_PORT}"

@@ -26,7 +26,7 @@ pipeline {
         stage('SET UP ENVIRONMENT') {
             REPO_IMAGE = "${params.NAME_DOCKER}/${params.NAME_IMAGE}:${params.TAG_NAME}"
         }
-        // Cài đặt các dependencies cần thiết cho quá trình build 
+        // Cài đặt các dependencies cần thiết cho quá trình build
         stage('Install Dependencies') {
             steps {
                 dir('app/octaltask-api') {
@@ -34,6 +34,29 @@ pipeline {
                         sh '''
                             npm install
                         '''
+                    }
+                }
+            }
+        }
+        // Thực hiện build và đóng gói ứng dụng thành Docker image
+        stage('Docker Build') {
+            steps{
+                dir('app/octaltask-api') {
+                    script {
+                        sh "docker build -t ${params.NAME_IMAGE} ."
+                    }
+                }
+            }
+        }
+        // Đẩy repo image lên kho chứa Docker
+        stage('Push Image to Docker Registry') {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
+                        sh """
+                            docker tag ${params.NAME_IMAGE} ${REPO_IMAGE}
+                            docker push ${REPO_IMAGE}
+                        """
                     }
                 }
             }

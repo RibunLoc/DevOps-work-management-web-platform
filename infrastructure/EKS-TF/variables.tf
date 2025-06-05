@@ -55,7 +55,7 @@ variable "eks-node-group-name" {
 variable "key_name" {
     description = "Tên của Key Pair để truy cập vào các EC2 instances"
     type = string
-    default = "sshkey"
+    default = "ssh_key"
 }
 
 variable "instance_type" {

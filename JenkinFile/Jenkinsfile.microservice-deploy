@@ -1,0 +1,57 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'SERVICE', defaultValue: '', description: 'Service cần build')
+        string(name: 'TAG', defaultValue: 'v1.0', description: 'Tag Docker image')
+    }
+
+    environment {
+        REPO_DOCKER = 'ribun'
+        DIR_MAP = [
+            'auth': 'auth-service',
+            'user': 'user-service',
+            'task': 'task-service',
+            'file': 'file-service',
+            'api': 'api-gateway'
+        ]
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'develop', url: 'https://github.com/RibunLoc/DevOps-work-management-web-platform.git'
+            }
+        }
+
+        stage('Build & Push Docker Image') {
+            steps {
+                dir('app/octaltask-api') {
+                    script {
+                        withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
+                            def dir = DIR_MAP[params.SERVICE]
+                            def imageName = "${REPO_DOCKER}/octaltask-backend-${params.SERVICE}-service:${params.TAG}"
+
+                            echo "🚀 Building image: ${imageName}"
+                            sh """
+                                docker build -t ${imageName} ${dir}
+                                docker push ${imageName}
+                            """
+                        }
+                    }
+                }
+            }
+        }
+
+        // Optional: Add deploy stage here (to K8s, ECS, etc.)
+    }
+
+    post {
+        success {
+            echo "✅ Build & push thành công: ${params.SERVICE}"
+        }
+        failure {
+            echo "❌ Lỗi trong quá trình xử lý service: ${params.SERVICE}"
+        }
+    }
+}

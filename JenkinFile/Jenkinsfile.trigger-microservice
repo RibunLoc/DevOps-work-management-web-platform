@@ -1,0 +1,66 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'BRANCH', defaultValue: 'develop', description: 'Nhánh Git cần kiểm tra')
+        string(name: 'TAG', defaultValue: 'dev', description: 'Tag Docker image')
+    }
+
+    environment {
+        REPO_URL = 'https://github.com/RibunLoc/DevOps-work-management-web-platform.git'
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: params.BRANCH, url: env.REPO_URL
+            }
+        }
+
+        stage('Detect Changed Services') {
+            steps {
+                dir('app/octaltask-api') {
+                    script {
+                        def changedFiles = sh(script: "git diff --name-only HEAD~1 HEAD", returnStdout: true).trim().split("\n")
+                        def services = []
+
+                        if (changedFiles.any { it.startsWith("api-gateway/") }) {
+                            services << "api"
+                        }
+                        if (changedFiles.any { it.startsWith("auth-service/") }) {
+                            services << "auth"
+                        }
+                        if (changedFiles.any { it.startsWith("file-service/") }) {
+                            services << "file"
+                        }
+                        if (changedFiles.any { it.startsWith("task-service/") }) {
+                            services << "task"
+                        }
+                        if (changedFiles.any { it.startsWith("user-service/") }) {
+                            services << "user"
+                        }
+
+                        if (services.isEmpty()) {
+                            echo "🟡 Không có thay đổi liên quan đến các dịch vụ cần build. Kết thúc pipeline."
+                            currentBuild.result = 'SUCCESS'
+                            return
+                        }
+
+                        echo "📦 Các service thay đổi: ${services.join(', ')}"
+
+                        def jobs = services.collectEntries { svc ->
+                            ["Build-${svc}": {
+                                build job: 'microservice-deploy', wait: true, parameters: [
+                                    string(name: 'SERVICE', value: svc),
+                                    string(name: 'TAG', value: params.TAG)
+                                ]
+                            }]
+                        }
+
+                        parallel jobs
+                    }
+                }
+            }
+        }
+    }
+}
