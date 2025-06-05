@@ -3,7 +3,7 @@ pipeline {
 
     parameters {
         string(name: 'BRANCH', defaultValue: 'develop', description: 'Nhánh Git cần kiểm tra')
-        string(name: 'TAG', defaultValue: 'dev', description: 'Tag Docker image')
+        string(name: 'TAG', defaultValue: 'v1.0', description: 'Tag Docker image')
     }
 
     environment {
@@ -19,46 +19,54 @@ pipeline {
 
         stage('Detect Changed Services') {
             steps {
-                dir('app/octaltask-api') {
-                    script {
-                        def changedFiles = sh(script: "git diff --name-only HEAD~1 HEAD", returnStdout: true).trim().split("\n")
-                        def services = []
+                script {
+                    sh "git fetch origin"
+                    def current = sh(script: "git rev-parse origin/${params.BRANCH}", returnStdout: true).trim()
+                    def previous = sh(script: "git rev-parse origin/${params.BRANCH}~1", returnStdout: true).trim()
 
-                        if (changedFiles.any { it.startsWith("api-gateway/") }) {
-                            services << "api"
-                        }
-                        if (changedFiles.any { it.startsWith("auth-service/") }) {
-                            services << "auth"
-                        }
-                        if (changedFiles.any { it.startsWith("file-service/") }) {
-                            services << "file"
-                        }
-                        if (changedFiles.any { it.startsWith("task-service/") }) {
-                            services << "task"
-                        }
-                        if (changedFiles.any { it.startsWith("user-service/") }) {
-                            services << "user"
-                        }
+                    echo "kiểm tra service nào cập nhật: ${previous}..${current}"
+                    def changedFiles = sh(
+                        script: "git dif --name-only ${previous} ${current}"
+                        returnStdout: true
+                    ).trim().split("\n")
+                    echo "Những file thay đổi:\n${changedFiles.join('\n')}"
 
-                        if (services.isEmpty()) {
-                            echo "🟡 Không có thay đổi liên quan đến các dịch vụ cần build. Kết thúc pipeline."
-                            currentBuild.result = 'SUCCESS'
-                            return
-                        }
+                    def services = []
 
-                        echo "📦 Các service thay đổi: ${services.join(', ')}"
-
-                        def jobs = services.collectEntries { svc ->
-                            ["Build-${svc}": {
-                                build job: 'microservice-deploy', wait: true, parameters: [
-                                    string(name: 'SERVICE', value: svc),
-                                    string(name: 'TAG', value: params.TAG)
-                                ]
-                            }]
-                        }
-
-                        parallel jobs
+                    if (changedFiles.any { it.startsWith("app/octaltask-api/api-gateway/") }) {
+                        services << "api"
                     }
+                    if (changedFiles.any { it.startsWith("auth-service/") }) {
+                        services << "auth"
+                    }
+                    if (changedFiles.any { it.startsWith("file-service/") }) {
+                        services << "file"
+                    }
+                    if (changedFiles.any { it.startsWith("task-service/") }) {
+                        services << "task"
+                    }
+                    if (changedFiles.any { it.startsWith("user-service/") }) {
+                        services << "user"
+                    }
+
+                    if (services.isEmpty()) {
+                        echo "🟡 Không có thay đổi liên quan đến các dịch vụ cần build. Kết thúc pipeline."
+                        currentBuild.result = 'SUCCESS'
+                        return
+                    }
+
+                    echo "📦 Các service thay đổi: ${services.join(', ')}"
+
+                    def jobs = services.collectEntries { svc ->
+                        ["Build-${svc}": {
+                            build job: 'microservice-deploy', wait: true, parameters: [
+                                string(name: 'SERVICE', value: svc),
+                                string(name: 'TAG', value: params.TAG)
+                            ]
+                        }]
+                    }
+
+                    parallel jobs
                 }
             }
         }
