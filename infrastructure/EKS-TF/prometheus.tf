@@ -47,7 +47,7 @@ resource "helm_release" "prometheus" {
 
 # Ref - https://artifacthub.io/packages/helm/grafana/grafana-operator
 resource "helm_release" "grafana_kubernetes_operator" {
-    depends_on = [helm_release.aws-load-balancer-controller]
+    depends_on = [helm_release.aws-load-balancer-controller, kubernetes_namespace.name]
     name = "grafana-operator"
     repository = "oci://ghcr.io/grafana/helm-charts"
     chart = "grafana-operator"
