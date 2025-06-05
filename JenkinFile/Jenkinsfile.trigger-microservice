@@ -26,7 +26,7 @@ pipeline {
 
                     echo "kiểm tra service nào cập nhật: ${previous}..${current}"
                     def changedFiles = sh(
-                        script: "git dif --name-only ${previous} ${current}",
+                        script: "git diff --name-only ${previous} ${current}",
                         returnStdout: true
                     ).trim().split("\n")
                     echo "Những file thay đổi:\n${changedFiles.join('\n')}"
