@@ -15,7 +15,7 @@ RUN npm install
 
 # Di chuyển vào service con để build
 WORKDIR /app/${SERVICE}
-
+RUN npm install
 RUN npm run build
 
 # Stage chạy ứng dụng
@@ -27,7 +27,7 @@ WORKDIR /app
 
 COPY --from=builder /app/${SERVICE}/dist ./dist
 COPY --from=builder /app/${SERVICE}/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/${SERVICE}/node_modules ./node_modules
 
 EXPOSE ${PORT}
 CMD ["npm", "run", "start"]

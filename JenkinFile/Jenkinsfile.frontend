@@ -23,8 +23,12 @@ pipeline {
             }
         }
         // Thiết lập biến môi trường cần thiết cho quá trình build
-        stage('SET UP ENVIROMENT') {
-            REPO_IMAGE  = "${params.NAME_DOCKER}/${params.NAME_IMAGE}:${params.TAG_NAME}"
+        stage('SET UP ENVIRONMENT') {
+            steps {
+                script {
+                    env.REPO_IMAGE  = "${params.NAME_DOCKER}/${params.NAME_IMAGE}:${params.TAG_NAME}"
+                }
+            }
         }
         // Cài đặt các dependecies cần thiết cho quá trình build
         stage('Install Dependencies') {
@@ -150,7 +154,7 @@ pipeline {
     }
     post {
         always {
-            archiverArtifacts artifacts: 'reports/**', fingerprint: true
+            archiveArtifacts artifacts: 'reports/**', fingerprint: true
         }
         success {
             echo 'Deployment successful!'

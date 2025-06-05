@@ -8,7 +8,7 @@ async function bootstrap() {
   const appContext = await NestFactory.createApplicationContext(AppModule);
   const configService = appContext.get(ConfigService);
 
-  const grpcUrl = configService.get<string>('GRPC_TASK_URL');
+  const grpcUrl = configService.get<string>('GRPC_LISTEN_TASK_URL');
 
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
     transport: Transport.GRPC,

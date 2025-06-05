@@ -8,6 +8,6 @@ export const getTaskGrpcClientOptions = (configService: ConfigService): ClientPr
   options: {
     package: 'task',
     protoPath: join(__dirname, '../proto/task.proto'),
-    url: configService.get<string>('CLIENT_GRPC_TASK_URL'),
+    url: configService.get<string>('GRPC_SERVER_TASK_URL'),
   },
 });

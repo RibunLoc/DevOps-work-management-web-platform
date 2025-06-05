@@ -1,12 +1,13 @@
 import type React from "react"
 import { useState } from "react"
 import { useSearchParams, useNavigate } from "react-router-dom"
-import axios from "axios"
+//import axios from "axios"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { CheckCircle, AlertCircle } from "lucide-react"
+import { resetPassword} from "@/lib/api/auth"
 
 export default function ResetPasswordPage() {
     const [newPassword, setNewPassword] = useState("")
@@ -34,10 +35,12 @@ export default function ResetPasswordPage() {
         }
 
         try {
-            const response = await axios.post("http://localhost:3000/auth/reset-password", {
-                token: token,
-                newPassword: newPassword,
-            })
+            // const response = await axios.post("http://localhost:3000/auth/reset-password", {
+            //     token: token,
+            //     newPassword: newPassword,
+            // })
+
+            await resetPassword (token, newPassword);
             setSuccess("Password changed successfully. Redirecting...")
             setTimeout(() => navigate("/login"), 2500)
         } catch (err: any) {

@@ -39,7 +39,7 @@ export function TaskListHeader({
     const handleSortChange = (option: SortOption) => {
         setCurrentSort(option);
         if (onSortChange) {
-            onSortChange(option);
+            onSortChange(currentSort);
         }
         setSortMenuOpen(false);
     };
@@ -67,19 +67,19 @@ export function TaskListHeader({
 
     return (
         <div className="mb-6">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
                 <h1 className="text-xl font-medium text-gray-800 dark:text-gray-100">{title}</h1>
 
                 <div className="flex items-center gap-4">
                     {/* Task progress indicator */}
-                    <div className="hidden sm:flex items-center gap-2">
+                    <div className="items-center hidden gap-2 sm:flex">
                         <div className="w-24 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                             <div
-                                className="h-full bg-blue-500 dark:bg-blue-400 rounded-full"
+                                className="h-full bg-blue-500 rounded-full dark:bg-blue-400"
                                 style={{ width: `${completionPercentage}%` }}
                             ></div>
                         </div>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
                             {completedTasks}/{totalTasks}
                         </span>
                     </div>
@@ -103,7 +103,7 @@ export function TaskListHeader({
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="z-0 h-9 px-3 rounded-full text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600 shadow-none"
+                            className="z-0 px-3 text-gray-600 border-gray-200 rounded-full shadow-none h-9 dark:text-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600"
                             onClick={() => setSortMenuOpen(!sortMenuOpen)}
                         >
                             <ArrowUpDown className="h-3.5 w-3.5 mr-1.5" />
@@ -111,28 +111,28 @@ export function TaskListHeader({
                         </Button>
 
                         {sortMenuOpen && (
-                            <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden z-30 border border-gray-100 dark:border-gray-700">
+                            <div className="absolute right-0 z-30 w-48 mt-1 overflow-hidden bg-white border border-gray-100 rounded-lg shadow-lg top-full dark:bg-gray-800 dark:border-gray-700">
                                 <div className="py-1">
                                     <button
-                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200"
+                                        className="w-full px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200"
                                         onClick={() => handleSortChange('date-desc')}
                                     >
                                         Date (newest first)
                                     </button>
                                     <button
-                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200"
+                                        className="w-full px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200"
                                         onClick={() => handleSortChange('date-asc')}
                                     >
                                         Date (oldest first)
                                     </button>
                                     <button
-                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200"
+                                        className="w-full px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200"
                                         onClick={() => handleSortChange('alpha-asc')}
                                     >
                                         Name (A-Z)
                                     </button>
                                     <button
-                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200"
+                                        className="w-full px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200"
                                         onClick={() => handleSortChange('alpha-desc')}
                                     >
                                         Name (Z-A)

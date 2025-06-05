@@ -5,11 +5,11 @@ import { Input } from '@/components/ui/input';
 import { ArrowLeft, Camera, Mail, UserRoundCog, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+//import { useNavigate } from 'react-router-dom';
 import { authInformation } from '@/lib/api/auth'; 
 
 export default function Profile() {
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
   // Placeholder user data - would come from auth context in a real app
   const [user, setUser] = useState({

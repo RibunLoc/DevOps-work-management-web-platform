@@ -6,7 +6,7 @@ import { Button } from '../../ui/button';
 import { Checkbox } from '../../ui/checkbox';
 import { Input } from '../../ui/input';
 import { EmptyTaskState } from './EmptyTaskState';
-import { useDrag, useDrop, DndProvider } from 'react-dnd';
+import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
 
@@ -92,7 +92,7 @@ const isTaskDue = (dateString: string) => {
 export function TaskList({
     tasks: propTasks,
     listId,
-    listName,
+    //listName,
     onEditTask,
     onAddTask,
     onUpdateTask,

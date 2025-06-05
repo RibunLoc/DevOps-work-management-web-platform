@@ -3,7 +3,8 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 // const API_BASE = import.meta.env.VITE_API_BASE; // Đổi URL khi deploy
-const getApiBase = () => window.__ENV__?.VITE_API_BASE || "http://localhost:3000"; // URL dành cho nginx 
+const getApiBase = () => window.__ENV__?.VITE_API_BASE || "http://localhost:3000"; // URL dành cho nginx
+
 
 export const login = async (email: string, password: string) => {
   const API_BASE = getApiBase();
@@ -49,6 +50,7 @@ export const resetPassword = async (token: string, password: string) => {
 export const authInformation = async () => {
   try {
     const token = Cookies.get('token');
+    const API_BASE = getApiBase();
     if (!token) throw new Error('No token found');
 
     console.log(token);

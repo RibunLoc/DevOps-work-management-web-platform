@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { SharedUser } from '@/types/task';
-import Cookies from 'js-cookie'; 
 import { authInformation } from '@/lib/api/auth'; 
 
 type UserRole = 'viewer' | 'editor' | 'admin';
@@ -60,7 +59,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   fetchUser();
 }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string) => {
     // login successfully with email and password
     const user: User = {
       id: '1',
@@ -78,7 +77,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('octalTaskUser');
   };
 
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (name: string, email: string) => {
     // test user
     const user: User = {
       id: Date.now().toString(),
@@ -93,8 +92,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   // Simulated functions for sharing
   const shareWithUser = async (
-    itemId: string,
-    itemType: 'task' | 'list',
+    _itemId: string,
+    _itemType: 'task' | 'list',
     email: string,
     role: UserRole
   ): Promise<SharedUser> => {
@@ -132,8 +131,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   const getSharedUsers = async (
-    itemId: string,
-    itemType: 'task' | 'list'
+    _itemId: string,
+    _itemType: 'task' | 'list'
   ): Promise<SharedUser[]> => {
     // In a real app, this would be an API call to get shared users
     // For demo, return an empty array

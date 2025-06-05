@@ -8,6 +8,6 @@ export const getAuthGrpcClientOptions = (configService: ConfigService): ClientPr
   options: {
     package: 'auth',
     protoPath: join(__dirname, '../proto/auth.proto'),
-    url: configService.get<string>('CLIENT_GRPC_AUTH_URL'),
+    url: configService.get<string>('GRPC_SERVER_AUTH_URL'),
   },
 });

@@ -8,6 +8,6 @@ export const getUserGrpcClientOptions = (configService: ConfigService): ClientPr
   options: {
     package: 'user',
     protoPath: join(__dirname, '../proto/user.proto'),
-    url: configService.get<string>('CLIENT_GRPC_USER_URL'),
+    url: configService.get<string>('GRPC_SERVER_USER_URL'),
   },
 });

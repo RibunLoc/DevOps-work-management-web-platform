@@ -20,8 +20,8 @@ interface TaskCommentsProps {
 export function TaskComments({
     task,
     currentUserId,
-    currentUserName,
-    currentUserPhoto,
+    //currentUserName,
+    //currentUserPhoto,
     onAddComment,
     onDeleteComment,
 }: TaskCommentsProps) {
@@ -54,7 +54,7 @@ export function TaskComments({
     return (
         <div className="flex flex-col h-full">
             {/* Comments list */}
-            <div className="space-y-2 mb-2 overflow-y-auto flex-grow">
+            <div className="flex-grow mb-2 space-y-2 overflow-y-auto">
                 {comments.map(comment => (
                     <div
                         key={comment.id}
@@ -65,19 +65,19 @@ export function TaskComments({
                             <AvatarFallback>{comment.userName.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1 space-y-1">
-                            <div className="flex justify-between items-start">
+                            <div className="flex items-start justify-between">
                                 <div>
-                                    <span className="font-medium text-sm">{comment.userName}</span>
-                                    <span className="text-xs text-gray-400 ml-2">{formatTime(comment.createdAt)}</span>
+                                    <span className="text-sm font-medium">{comment.userName}</span>
+                                    <span className="ml-2 text-xs text-gray-400">{formatTime(comment.createdAt)}</span>
                                 </div>
                                 {comment.userId === currentUserId && (
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-6 w-6 opacity-0 group-hover:opacity-100 rounded-full hover:bg-red-50 hover:text-red-500 transition-colors"
+                                        className="w-6 h-6 transition-colors rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-50 hover:text-red-500"
                                         onClick={() => handleDeleteComment(comment.id)}
                                     >
-                                        <Trash2 className="h-3 w-3" />
+                                        <Trash2 className="w-3 h-3" />
                                     </Button>
                                 )}
                             </div>
@@ -87,14 +87,14 @@ export function TaskComments({
                 ))}
 
                 {comments.length === 0 && (
-                    <div className="text-center py-3 text-gray-400 dark:text-gray-500 text-xs italic">
+                    <div className="py-3 text-xs italic text-center text-gray-400 dark:text-gray-500">
                         No comments yet
                     </div>
                 )}
             </div>
 
             {/* Add comment - fixed at bottom */}
-            <div className="mt-1 pt-2 border-t border-gray-100 dark:border-gray-700">
+            <div className="pt-2 mt-1 border-t border-gray-100 dark:border-gray-700">
                 <div className="relative">
                     <textarea
                         className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm h-[50px] pr-10 resize-none focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -112,11 +112,11 @@ export function TaskComments({
                         <Button
                             size="icon"
                             variant="ghost"
-                            className="h-6 w-6 p-0 text-blue-500 hover:text-blue-600"
+                            className="w-6 h-6 p-0 text-blue-500 hover:text-blue-600"
                             onClick={handleSubmitComment}
                             disabled={!newComment.trim()}
                         >
-                            <Send className="h-4 w-4" />
+                            <Send className="w-4 h-4" />
                         </Button>
                     </div>
                 </div>

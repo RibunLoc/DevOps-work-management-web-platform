@@ -5,7 +5,7 @@ import { CreateListForm } from './CreateListForm';
 
 
 
-type ListColor = 'blue' | 'green' | 'red' | 'purple' | 'amber';
+type ListColor = 'blue' | 'green' | 'red' | 'purple' | 'amber' | 'black';
 type ListIcon = 'personal' | 'work' | 'home' | 'study' | 'default';
 
 interface CreateListModalProps {
@@ -21,14 +21,14 @@ export function CreateListModal({ onClose, onCreateList }: CreateListModalProps)
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
-            <Card className="w-full max-w-md relative overflow-hidden shadow-lg">
+            <Card className="relative w-full max-w-md overflow-hidden shadow-lg">
                 <Button
                     variant="ghost"
                     size="icon"
                     onClick={onClose}
                     className="absolute right-2 top-2"
                 >
-                    <X className="h-4 w-6" />
+                    <X className="w-6 h-4" />
                 </Button>
 
                 <CreateListForm onSubmit={handleSubmit} onCancel={onClose} />

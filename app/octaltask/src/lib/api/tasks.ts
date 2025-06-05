@@ -1,13 +1,14 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { CardTitle } from '@/components/ui/card';
-
-const API_BASE = import.meta.env.VITE_API_BASE; 
+//import { CardTitle } from '@/components/ui/card';
+ 
+const getApiBase = () => window.__ENV__?.VITE_API_BASE || "http://localhost:3000"; // URL dành cho nginx
 
 // List handle 
 export const createList = async (name: string, icon: string, color: string) => {
   try {
     const token = Cookies.get('token');
+    const API_BASE = getApiBase();
     if (!token) throw new Error('No token found');
 
     const currentDate = new Date().toISOString(); // lấy ngày hệ thống hiện tại
@@ -36,6 +37,7 @@ export const createList = async (name: string, icon: string, color: string) => {
 
 export const getLists = async () => {
   try {
+    const API_BASE = getApiBase();
     const token = Cookies.get('token');
     if (!token) throw new Error('No token found');
 
@@ -54,6 +56,7 @@ export const getLists = async () => {
 
 export const getListsById = async (id: string) => {
   try {
+    const API_BASE = getApiBase();
     const token = Cookies.get('token');
     if (!token) throw new Error('No token found');
 
@@ -72,6 +75,7 @@ export const getListsById = async (id: string) => {
 
 export const deleteListById = async (id: string | number) => {
   try {
+    const API_BASE = getApiBase();
     const token = Cookies.get('token');
     if (!token) throw new Error('No token found');
 
@@ -96,6 +100,7 @@ export const updateListById = async (
   }
 ) => {
   try {
+    const API_BASE = getApiBase();
     const token = Cookies.get('token');
     if (!token) throw new Error('No token found');
 
@@ -130,6 +135,7 @@ export const createTask = async (
   dueDate?: string
 ) => {
   try {
+    const API_BASE = getApiBase();
     const token = Cookies.get('token');
     if (!token) throw new Error('No token found');
 
@@ -142,7 +148,7 @@ export const createTask = async (
         description,
         isCompleted: false,
         dueDate: formattedDueDate || null,
-        listId: parseInt(listId),
+        listId: parseInt(listId)
       },
       {
         headers: {
@@ -159,6 +165,7 @@ export const createTask = async (
 
 export const getTasks = async () => {
   try {
+    const API_BASE = getApiBase();
     const token = Cookies.get('token');
     if (!token) throw new Error('No token found');
 
@@ -174,6 +181,7 @@ export const getTasks = async () => {
 
 export const getTaskById = async (id: string) => {
   try {
+    const API_BASE = getApiBase();
     const token = Cookies.get('token');
     if (!token) throw new Error('No token found');
 
@@ -189,6 +197,7 @@ export const getTaskById = async (id: string) => {
 
 export const deleteTaskById = async (id: string | number) => {
   try {
+    const API_BASE = getApiBase();
     const token = Cookies.get('token');
     if (!token) throw new Error('No token found');
 
@@ -213,18 +222,13 @@ export const updateTaskById = async (
   }
 ) => {
   try {
+    const API_BASE = getApiBase();
     const token = Cookies.get('token');
     if (!token) throw new Error('No token found');
 
-    const formattedUpdates = {
-      ...updates,
-      dueDate: updates.dueDate ? formatDueDate(updates.dueDate) : undefined,
-    };
-
-
     const res = await axios.patch(
       `${API_BASE}/tasks/${id}`,
-       formattedUpdates,
+      updates, 
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -238,8 +242,10 @@ export const updateTaskById = async (
   }
 };
 
+
 // Subtasks handle
 export const getSubtasksByTaskId = async (taskId: number | string) => {
+  const API_BASE = getApiBase();
   const token = Cookies.get('token');
   if (!token) throw new Error('No token found');
 
@@ -250,13 +256,79 @@ export const getSubtasksByTaskId = async (taskId: number | string) => {
   return res.data;
 };
 
+export const createSubtaskByTaskId = async (taskId: string | number, content: string, isCompleted = false) => {
+  const API_BASE = getApiBase();
+  const token = Cookies.get('token');
+  if (!token) throw new Error('No token found');
+
+  const res = await axios.post(
+    `${API_BASE}/tasks/${taskId}/subtasks`,
+    { content, isCompleted },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return res.data;
+};
+
+export const deleteSubtaskById = async (subtaskId: string | number) => {
+  const API_BASE = getApiBase();
+  const token = Cookies.get('token');
+  if (!token) throw new Error('No token found');
+
+  const res = await axios.delete(`${API_BASE}/subtasks/${subtaskId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.data;
+};
+
+
 // Comments handle
 export const getCommentsByTaskId = async (taskId: number | string) => {
+  const API_BASE = getApiBase();
   const token = Cookies.get('token');
   if (!token) throw new Error('No token found');
 
   const res = await axios.get(`${API_BASE}/tasks/${taskId}/comments`, {
     headers: { Authorization: `Bearer ${token}` }
+  });
+
+  return res.data;
+};
+
+export const createComment = async (taskId: string, content: string) => {
+  const API_BASE = getApiBase();
+  const token = Cookies.get('token');
+  if (!token) throw new Error('No token found');
+
+  const res = await axios.post(
+    `${API_BASE}/tasks/${taskId}/comments`,
+    { content },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return res.data;
+};
+
+export const deleteCommentById = async (commentId: string) => {
+  const API_BASE = getApiBase();
+  const token = Cookies.get('token');
+  if (!token) throw new Error('No token found');
+
+  const res = await axios.delete(`${API_BASE}/comments/${commentId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
 
   return res.data;

@@ -1,10 +1,10 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Task, TaskList, Comment, Attachment } from '@/types/task';
 import { useUser } from './UserContext';
-import {createList, getLists, getListsById,  updateListById, deleteListById} from '@/lib/api/tasks';
-import { createTask, getTasks, getTaskById, updateTaskById, deleteTaskById } from '@/lib/api/tasks';
-import { getSubtasksByTaskId } from '@/lib/api/tasks';
-import { getCommentsByTaskId } from '@/lib/api/tasks';
+import {createList, getLists,  updateListById, deleteListById} from '@/lib/api/tasks';
+import { createTask, getTasks, updateTaskById, deleteTaskById } from '@/lib/api/tasks';
+import { getSubtasksByTaskId, createSubtaskByTaskId, deleteSubtaskById  } from '@/lib/api/tasks';
+import { getCommentsByTaskId, createComment, deleteCommentById } from '@/lib/api/tasks';
 interface TaskContextType {
     tasks: Task[];
     lists: TaskList[];
@@ -267,7 +267,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
             id: createdTask.id.toString(),
             title: createdTask.title,
             completed: createdTask.isCompleted || false,
-            listId: createdTask.listId.toString(),
+            listId: createdTask.listId.toString() || null,
             dueDate: createdTask.dueDate || undefined,
             notes: createdTask.description || '',
             isStarred: false,
@@ -283,67 +283,135 @@ export function TaskProvider({ children }: { children: ReactNode }) {
 
 
     const updateTask = async (taskId: string, updates: Partial<Task>): Promise<Task> => {
-        const updatePayload = {
-            title: updates.title,
-            description: updates.notes,
-            isCompleted: updates.completed,
-            dueDate: updates.dueDate,
-            listId: updates.listId ? parseInt(updates.listId) : undefined,
+        const formatDueDate = (rawDate?: string): string | undefined => {
+            if (!rawDate || typeof rawDate !== 'string' || rawDate.trim() === '') return undefined;
+            const isoCandidate = new Date(`${rawDate}T00:00:00.000Z`);
+            return isNaN(isoCandidate.getTime()) ? undefined : isoCandidate.toISOString();
         };
 
+        const processListId = (listId?: string | number): number | undefined => {
+            if (listId === null || listId === undefined || listId === '') return undefined;
+            if (typeof listId === 'number') return isNaN(listId) ? undefined : listId;
+            if (typeof listId === 'string') {
+            const parsed = parseInt(listId.trim(), 10);
+            return isNaN(parsed) ? undefined : parsed;
+            }
+            return undefined;
+        };
+
+        const updatePayload = {
+            title: updates.title ?? '',
+            description: updates.notes ?? '',
+            isCompleted: updates.completed ?? false,
+            dueDate: formatDueDate(updates.dueDate),
+            listId: processListId(updates.listId),
+        };
+
+        try {
+        // Cập nhật task chính
         const updatedData = await updateTaskById(taskId, updatePayload);
 
+        // Lấy task hiện tại từ state
+        const currentTask = tasks.find(t => t.id === taskId);
+        //const currentSubtaskIds = new Set(currentTask?.subtasks?.map(st => st.id));
+
+        const newSubtasks = updates.subtasks ?? [];
+
+        // ID subtasks cần giữ lại
+        const incomingIds = new Set(newSubtasks.filter(st => st.id).map(st => st.id));
+        const subtasksToDelete = currentTask?.subtasks?.filter(st => !incomingIds.has(st.id)) || [];
+        const subtasksToCreate = newSubtasks.filter(st => !st.id);
+
+        // 1. Xoá subtasks không còn nữa
+        await Promise.all(subtasksToDelete.map(async (st) => {
+            try {
+                await deleteSubtaskById(st.id);
+            } catch (err) {
+                console.error(`Failed to delete subtask ${st.id}`, err);
+            }
+            }));
+
+            // 2. Tạo subtasks mới
+            const createdSubtasks = await Promise.all(
+            subtasksToCreate.map(async (sub) => {
+                const created = await createSubtaskByTaskId(taskId, sub.title, sub.completed);
+                return {
+                id: created.id.toString(),
+                title: created.content,
+                completed: created.isCompleted,
+                };
+            })
+            );
+
+        // 3. Ghép subtasks giữ lại (có id) và subtasks vừa tạo
+        const finalSubtasks = [
+            ...newSubtasks.filter(st => st.id), // giữ lại subtasks cũ còn tồn tại
+            ...createdSubtasks // subtasks vừa tạo
+            ];
+
+        // 4. Cập nhật lại task trong state
         const updatedTask: Task = {
             id: updatedData.id.toString(),
             title: updatedData.title,
             completed: updatedData.isCompleted,
-            listId: updatedData.listId.toString(),
-            dueDate: updatedData.dueDate || undefined,
+            listId: updatedData.listId,
+            dueDate: updatedData.dueDate
+                ? new Date(updatedData.dueDate).toISOString().split('T')[0]
+                : undefined,
             notes: updatedData.description || '',
-            isStarred: false,
-            assignedTo: undefined,
-            subtasks: [],
+            isStarred: updatedData.isStarred ?? false,
+            assignedTo: updatedData.userId || undefined,
+            subtasks: finalSubtasks.map(st => ({
+                    id: st.id,
+                    title: st.title,
+                    completed: st.completed, // đổi lại đúng định dạng của SubTask
+                })),
+
             comments: [],
             sharedWith: [],
-        };
+            attachments: [],
+            };
 
-        setTasks(prev =>
+            setTasks(prev =>
             prev.map(task => (task.id === taskId ? updatedTask : task))
-        );
+            );
 
-        return updatedTask;
-        };
-
-
-   const deleteTask = async (taskId: string): Promise<void> => {
-        await deleteTaskById(taskId);
-        setTasks(prev => prev.filter(task => task.id !== taskId));
-        };
-
-
-    const getTasksByList = (listId: string): Task[] => {
-        return tasks.filter(task => task.listId === listId);
-    };
-
-    // Implement the starTask function
-    const starTask = async (taskId: string): Promise<Task> => {
-        const task = tasks.find(task => task.id === taskId);
-        if (!task) {
-            throw new Error('Task not found');
+            return updatedTask;
+        } catch (error) {
+            console.error('Error updating task with subtasks:', error);
+            throw error;
         }
-
-        // Toggle the isStarred status
-        const updatedTask = {
-            ...task,
-            isStarred: !task.isStarred,
-            updatedAt: new Date().toISOString()
         };
 
-        setTasks(prevTasks =>
-            prevTasks.map(t => t.id === taskId ? updatedTask : t)
-        );
+    const deleteTask = async (taskId: string): Promise<void> => {
+            await deleteTaskById(taskId);
+            setTasks(prev => prev.filter(task => task.id !== taskId));
+            };
 
-        return updatedTask;
+
+        const getTasksByList = (listId: string): Task[] => {
+            return tasks.filter(task => task.listId === listId);
+        };
+
+        // Implement the starTask function
+        const starTask = async (taskId: string): Promise<Task> => {
+            const task = tasks.find(task => task.id === taskId);
+            if (!task) {
+                throw new Error('Task not found');
+            }
+
+            // Toggle the isStarred status
+            const updatedTask = {
+                ...task,
+                isStarred: !task.isStarred,
+                updatedAt: new Date().toISOString()
+            };
+
+            setTasks(prevTasks =>
+                prevTasks.map(t => t.id === taskId ? updatedTask : t)
+            );
+
+            return updatedTask;
     };
 
     // List operations
@@ -588,75 +656,50 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     // Comments & Questions operations
     const addComment = async (taskId: string, content: string): Promise<Comment> => {
         try {
-            // In a real app, this would make an API call
-            const task = tasks.find(t => t.id === taskId);
-            if (!task) {
-                throw new Error("Task not found");
-            }
+            const res = await createComment(taskId, content);
 
             const newComment: Comment = {
-                id: `comment-${Date.now()}`,
-                taskId,
-                userId: currentUser?.id || 'anonymous',
-                content,
-                createdAt: new Date().toISOString(),
-                userName: '',
+            id: res.id.toString(),
+            taskId: taskId,
+            userId: res.user?.userId?.toString() ?? '',
+            content: res.content,
+            createdAt: res.createdAt,
+            userName: res.user?.email || 'Unknown',
+            userPhotoUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(res.user?.email || 'Unknown')}&background=random`
             };
 
-            // Update the task with the new comment
-            const updatedTask = {
-                ...task,
-                comments: [...(task.comments || []), newComment]
-            };
-
-            // Update the tasks array
-            const updatedTasks = tasks.map(t => t.id === taskId ? updatedTask : t);
-            setTasks(updatedTasks);
-
-            // Save to localStorage immediately
-            localStorage.setItem('octalTasks', JSON.stringify(updatedTasks));
+            setTasks(prev =>
+            prev.map(task =>
+                task.id === taskId
+                ? { ...task, comments: [...(task.comments || []), newComment] }
+                : task
+            )
+            );
 
             return newComment;
-        } catch (error) {
-            console.error("Error adding comment:", error);
-            throw error;
+        } catch (err) {
+            console.error('Failed to create comment:', err);
+            throw err;
         }
-    };
+        };
+
 
     const deleteComment = async (commentId: string): Promise<void> => {
         try {
-            // Find the task containing this comment
-            const taskWithComment = tasks.find(task =>
-                task.comments && task.comments.some(comment => comment.id === commentId)
+            await deleteCommentById(commentId);
+
+            setTasks(prev =>
+            prev.map(task => ({
+                ...task,
+                comments: (task.comments || []).filter(c => c.id !== commentId),
+            }))
             );
-
-            if (!taskWithComment) {
-                console.error(`No task found with comment ID: ${commentId}`);
-                return;
-            }
-
-            // Update that specific task's comments
-            const updatedTasks = tasks.map(task => {
-                if (task.id === taskWithComment.id) {
-                    return {
-                        ...task,
-                        comments: (task.comments || []).filter(comment => comment.id !== commentId)
-                    };
-                }
-                return task;
-            });
-
-            // Update state
-            setTasks(updatedTasks);
-
-            // Save to localStorage immediately
-            localStorage.setItem('octalTasks', JSON.stringify(updatedTasks));
-            console.log(`Comment ${commentId} deleted successfully`);
-        } catch (error) {
-            console.error("Error deleting comment:", error);
-            throw error;
+        } catch (err) {
+            console.error('Failed to delete comment:', err);
+            throw err;
         }
-    };
+        };
+
 
     const addAttachment = async (taskId: string, file: File): Promise<Attachment> => {
       try {

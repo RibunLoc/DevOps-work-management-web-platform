@@ -119,7 +119,8 @@ message UserIdRequest {
 message UserInfo {
   int32 userId = 1;
   string email = 2;
-  string role = 3;
+  string name = 3;
+  string role = 4;
 }
 
 message TaskResponse {

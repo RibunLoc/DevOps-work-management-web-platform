@@ -3,9 +3,9 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
+import { Card, CardContent, CardFooter} from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+//import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { CheckCircle } from "lucide-react"
 import { forgotPassword } from "@/lib/api/auth"
@@ -52,10 +52,10 @@ const PasswordRecovery = () => {
     return (
         <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
             {/* Left side illustration */}
-            <div className="hidden lg:flex lg:w-1/2 bg-blue-50 dark:bg-gray-800 items-center justify-center p-12">
+            <div className="items-center justify-center hidden p-12 lg:flex lg:w-1/2 bg-blue-50 dark:bg-gray-800">
                 <div className="max-w-md">
                     <div className="mb-8 text-center lg:text-left">
-                        <h1 className="text-4xl font-normal mb-2">
+                        <h1 className="mb-2 text-4xl font-normal">
                             <span className="font-medium text-blue-600 dark:text-blue-400">Octal</span>
                             <span className="font-normal text-gray-800 dark:text-gray-200">Task</span>
                         </h1>
@@ -80,33 +80,33 @@ const PasswordRecovery = () => {
             </div>
 
             {/* Right side recovery form */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-12">
+            <div className="flex items-center justify-center w-full px-6 py-12 lg:w-1/2">
                 <div className="w-full max-w-md space-y-8">
                     <div className="text-center lg:hidden">
-                        <h1 className="text-4xl font-normal mb-2">
+                        <h1 className="mb-2 text-4xl font-normal">
                             <span className="font-medium text-blue-600 dark:text-blue-400">Octal</span>
                             <span className="font-normal text-gray-800 dark:text-gray-200">Task</span>
                         </h1>
                         <h2 className="text-2xl font-normal text-gray-700 dark:text-gray-300">Account recovery</h2>
-                        <p className="text-sm mt-2 text-gray-600 dark:text-gray-400">Get a password reset link</p>
+                        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Get a password reset link</p>
                     </div>
 
                     <div className="hidden lg:block lg:text-left">
                         <h2 className="text-3xl font-normal text-gray-700 dark:text-gray-300">Account recovery</h2>
-                        <p className="text-sm mt-2 text-gray-600 dark:text-gray-400">Get a password reset link</p>
+                        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Get a password reset link</p>
                     </div>
 
-                    <Card className="border border-gray-200 dark:border-gray-700 shadow-sm rounded-2xl bg-white dark:bg-gray-800">
-                        <CardContent className="pt-6 px-6 sm:px-8">
+                    <Card className="bg-white border border-gray-200 shadow-sm dark:border-gray-700 rounded-2xl dark:bg-gray-800">
+                        <CardContent className="px-6 pt-6 sm:px-8">
                             {isSubmitted ? (
                                 <div className="py-4">
-                                    <Alert className="bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800/30 text-blue-800 dark:text-blue-300 rounded-lg py-3">
-                                        <CheckCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                    <Alert className="py-3 text-blue-800 border-blue-100 rounded-lg bg-blue-50 dark:bg-blue-900/20 dark:border-blue-800/30 dark:text-blue-300">
+                                        <CheckCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                                         <AlertDescription className="ml-2 text-sm">
                                             If an account exists with that email, we've sent a password reset link. Please check your inbox.
                                         </AlertDescription>
                                     </Alert>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-4">
+                                    <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
                                         The email might take a few minutes to arrive. Be sure to check your spam folder.
                                     </p>
                                 </div>
@@ -117,14 +117,14 @@ const PasswordRecovery = () => {
                                             id="email"
                                             type="email"
                                             placeholder="Email address"
-                                            className="h-12 rounded-lg border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring focus:ring-blue-200 dark:focus:ring-blue-800 dark:focus:ring-opacity-30 bg-white dark:bg-gray-700 px-4"
+                                            className="h-12 px-4 bg-white border-gray-300 rounded-lg dark:border-gray-600 focus:border-blue-500 focus:ring focus:ring-blue-200 dark:focus:ring-blue-800 dark:focus:ring-opacity-30 dark:bg-gray-700"
                                             {...register("email")}
                                             aria-invalid={errors.email ? "true" : "false"}
                                         />
-                                        {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>}
+                                        {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>}
                                     </div>
 
-                                    <p className="text-sm text-left text-gray-600 dark:text-gray-400 mt-2">
+                                    <p className="mt-2 text-sm text-left text-gray-600 dark:text-gray-400">
                                         We'll send a recovery link to this email if it matches an account in our system.
                                     </p>
 
@@ -144,13 +144,13 @@ const PasswordRecovery = () => {
                         <CardFooter className="flex justify-center p-6 border-t border-gray-100 dark:border-gray-700">
                             <p className="text-sm text-gray-600 dark:text-gray-400">
                                 {isSubmitted ? (
-                                    <a href="/login" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">
+                                    <a href="/login" className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
                                         Back to sign in
                                     </a>
                                 ) : (
                                     <>
                                         Remember your password?{" "}
-                                        <a href="/login" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">
+                                        <a href="/login" className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
                                             Sign in
                                         </a>
                                     </>

@@ -23,7 +23,7 @@ import { User } from './user/entities/user.entity';
         database: config.get<string>('DB_DATABASE'),
         entities: [User],
         synchronize: true,
-        logging: true,
+        logging: false,
       }),
       inject: [ConfigService],
     }),

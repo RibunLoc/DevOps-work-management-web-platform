@@ -8,7 +8,7 @@ interface LogoProps {
   fontWeight?: 'semibold' | 'bold';
 }
 
-export function Logo({ size = 'md', showText = true, color = 'blue', className = '', fontWeight = 'bold' }: LogoProps) {
+export function Logo({ size = 'md', showText = true, color = 'blueLight', className = '', fontWeight = 'bold' }: LogoProps) {
   // Size classes mapping
   const sizeClasses = {
     sm: 'h-3 w-5',

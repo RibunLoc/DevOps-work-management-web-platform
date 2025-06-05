@@ -27,11 +27,11 @@ export function CreateListForm({ onSubmit, onCancel }: CreateListFormProps) {
     ];
 
     const icons: { value: ListIcon; icon: ReactNode }[] = [
-        { value: 'default', icon: <Folder className="h-5 w-5" /> },
-        { value: 'personal', icon: <CheckCircle2 className="h-5 w-5" /> },
-        { value: 'work', icon: <Briefcase className="h-5 w-5" /> },
-        { value: 'home', icon: <Home className="h-5 w-5" /> },
-        { value: 'study', icon: <BookOpen className="h-5 w-5" /> },
+        { value: 'default', icon: <Folder className="w-5 h-5" /> },
+        { value: 'personal', icon: <CheckCircle2 className="w-5 h-5" /> },
+        { value: 'work', icon: <Briefcase className="w-5 h-5" /> },
+        { value: 'home', icon: <Home className="w-5 h-5" /> },
+        { value: 'study', icon: <BookOpen className="w-5 h-5" /> },
     ];
 
     const handleSubmit = () => {
@@ -42,10 +42,10 @@ export function CreateListForm({ onSubmit, onCancel }: CreateListFormProps) {
 
     return (
         <div className="p-4 space-y-4">
-            <h3 className="font-medium text-lg">Create New List</h3>
+            <h3 className="text-lg font-medium">Create New List</h3>
 
             <div>
-                <label className="text-sm font-medium mb-1 block">List Name</label>
+                <label className="block mb-1 text-sm font-medium">List Name</label>
                 <Input
                     placeholder="Enter list name"
                     value={name}
@@ -56,7 +56,7 @@ export function CreateListForm({ onSubmit, onCancel }: CreateListFormProps) {
             </div>
 
             <div>
-                <label className="text-sm font-medium mb-2 block">Color</label>
+                <label className="block mb-2 text-sm font-medium">Color</label>
                 <div className="flex gap-2 mb-4">
                     {colors.map((color) => (
                         <div
@@ -69,7 +69,7 @@ export function CreateListForm({ onSubmit, onCancel }: CreateListFormProps) {
                                     ${selectedColor === color.value ? 'ring-2 ring-offset-2 ring-gray-400' : 'opacity-80 hover:opacity-100'}`}
                             >
                                 {selectedColor === color.value && (
-                                    <CheckCircle2 className="h-5 w-5 text-white pointer-events-none" />
+                                    <CheckCircle2 className="w-5 h-5 text-white pointer-events-none" />
                                 )}
                             </div>
                         </div>
@@ -78,7 +78,7 @@ export function CreateListForm({ onSubmit, onCancel }: CreateListFormProps) {
             </div>
 
             <div>
-                <label className="text-sm font-medium mb-2 block">Icon</label>
+                <label className="block mb-2 text-sm font-medium">Icon</label>
                 <div className="flex gap-2 mb-4">
                     {icons.map((iconObj) => {
                         const colorClass = colors.find(c => c.value === selectedColor)?.iconClass || '';
@@ -108,7 +108,7 @@ export function CreateListForm({ onSubmit, onCancel }: CreateListFormProps) {
                 </div>
             </div>
 
-            <div className="flex justify-end space-x-2 pt-2">
+            <div className="flex justify-end pt-2 space-x-2">
                 <Button variant="outline" onClick={onCancel}>
                     Cancel
                 </Button>

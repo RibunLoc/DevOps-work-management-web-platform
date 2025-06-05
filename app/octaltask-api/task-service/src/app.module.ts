@@ -31,7 +31,7 @@ import { ListShared } from './entities/list-shared.entity';
         database: config.get<string>('DB_DATABASE'),
         entities: [Task, User, Comment, Subtask, List, ListShared],
         synchronize: true,
-        logging: true,
+        logging: false,
       }),
       inject: [ConfigService],
     }),
