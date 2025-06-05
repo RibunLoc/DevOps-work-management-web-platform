@@ -36,16 +36,16 @@ pipeline {
                     if (changedFiles.any { it.startsWith("app/octaltask-api/api-gateway/") }) {
                         services << "api"
                     }
-                    if (changedFiles.any { it.startsWith("auth-service/") }) {
+                    if (changedFiles.any { it.startsWith("app/octaltask-api/auth-service/") }) {
                         services << "auth"
                     }
-                    if (changedFiles.any { it.startsWith("file-service/") }) {
+                    if (changedFiles.any { it.startsWith("app/octaltask-api/file-service/") }) {
                         services << "file"
                     }
-                    if (changedFiles.any { it.startsWith("task-service/") }) {
+                    if (changedFiles.any { it.startsWith("app/octaltask-api/task-service/") }) {
                         services << "task"
                     }
-                    if (changedFiles.any { it.startsWith("user-service/") }) {
+                    if (changedFiles.any { it.startsWith("app/octaltask-api/user-service/") }) {
                         services << "user"
                     }
 
