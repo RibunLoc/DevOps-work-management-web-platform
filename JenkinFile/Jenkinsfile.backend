@@ -13,7 +13,7 @@ def buildServices(noidung, lenhthucthi) {
 }
 
 pipeline {
-    agent any
+    agent none
 
     // Cung cấp thông tin cần thiết cho pipeline
     parameters {
@@ -31,12 +31,14 @@ pipeline {
     stages {
         // Kiểm tra mã nguồn
         stage('Checkout from Git') {
+            agent { label 'agent1' }
             steps {
                 checkout scm
             }
         }
         // Kiểm tra từng dịch vụ xem có sự cập nhật hay không bằng cách so sánh khác biệt của base cũ và mới
         stage('Detect Changed Folder') {
+            agent { label 'agent1' }
             steps {
                 script {
                     sh 'git fetch origin'
@@ -66,6 +68,7 @@ pipeline {
         }
         // Cài đặt các dependencies cần thiết cho quá trình build
         stage('Install Dependencies') {
+            agent { label 'agent1' }
             when  {
                 expression { return env.TARGET_SERVICES }
             }
@@ -88,6 +91,7 @@ pipeline {
             }
             parallel {
                 stage('Scan Code with SonarQube') {
+                    agent { label 'agent1' }
                     steps {
                         script {
                             buildServices("Sonar Scan") { svc ->
@@ -108,7 +112,7 @@ pipeline {
                 }
 
                 stage('Scan Code with Snyk') {
-                    agent { label 'agent1' }
+                    agent { label 'agent2' }
                     steps {
                         script {
                             withCredentials([
@@ -132,6 +136,7 @@ pipeline {
         }
         // Thực hiện build và đóng gói ứng dụng thành Docker image
         stage('Docker Build') {
+            agent { label 'agent1' }
             when {
                 expression { return env.TARGET_SERVICES }
             }
@@ -146,6 +151,7 @@ pipeline {
         }
         // Đảm bảo image phải sạch bằng cách dùng trivy
         stage('Trivy Scan Image') {
+            agent { label 'agent1' }
             when {
                 expression { return env.TARGET_SERVICES }
             }
@@ -165,6 +171,7 @@ pipeline {
         }
         // Đẩy repo image lên kho chứa Docker
         stage('Push Image to Docker Registry') {
+            agent { label 'agent1' }
             when  {
                 expression { return env.TARGET_SERVICES }
             }
