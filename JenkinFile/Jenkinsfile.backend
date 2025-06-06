@@ -70,8 +70,8 @@ pipeline {
                             }
                         }
                     }
+                    parallel jobs
                 }
-                parallel jobs
             }
         }
         // Thực hiện build và đóng gói ứng dụng thành Docker image
@@ -92,8 +92,8 @@ pipeline {
                             }
                         }
                     }
+                    parallel jobs
                 }
-                parallel jobs
             }
         }
         // Đẩy repo image lên kho chứa Docker
@@ -118,8 +118,8 @@ pipeline {
                             }
                         }
                     }
+                    parallel jobs
                 }
-                parallel jobs
             }
         }
     }
