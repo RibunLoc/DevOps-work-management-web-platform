@@ -24,11 +24,13 @@ pipeline {
         }
         // Thiết lập biến môi trường cần thiết cho quá trình build
         stage('SET UP ENVIRONMENT') {
-            script {
-                REPO_IMAGE = "${params.NAME_DOCKER}/${params.NAME_IMAGE}:${params.TAG_NAME}"
+            steps {
+                script {
+                    REPO_IMAGE = "${params.NAME_DOCKER}/${params.NAME_IMAGE}:${params.TAG_NAME}"
+                }
             }
         }
-        // 
+        // Kiểm tra từng dịch vụ xem có sự cập nhật hay không bằng cách so sánh khác biệt của base cũ và mới
         stage('Detect Changed Folder') {
             steps {
                 script {
@@ -49,7 +51,7 @@ pipeline {
                         return
                     }
 
-                    echo "➡️ Build service: ${target}"
+                    echo "Build service: ${target}"
                     env.TARGET_SERVICE = target
                 }
             }
