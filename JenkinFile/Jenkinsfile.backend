@@ -45,23 +45,23 @@ pipeline {
                     }
 
                     echo "Những dịch vụ cần build: ${changedServices.join(', ')}"
-                    env.TARGET_SERVICE = changedServices.join(',')
+                    env.TARGET_SERVICES = changedServices.join(',')
                 }
             }
         }
         // Cài đặt các dependencies cần thiết cho quá trình build
         stage('Install Dependencies') {
             when  {
-                expression { return env.TARGET_SERVICE }
+                expression { return env.TARGET_SERVICES }
             }
             steps {
                 script {
                     def jobs = [:]
-                    def services = env.TARGET_SERVICE.split(',')
+                    def services = env.TARGET_SERVICES.split(',')
                     // Duyệt từng service
                     services.each {
                         svc -> jobs["Cài đặt dependencies: ${svc}"] {
-                            dir("app/octaltask-api/${svc}") {
+                            dir("app/octaltask-api/${svc}/") {
                                 echo "Starting install dependencies..."
                                 sh '''
                                     npm install
@@ -77,16 +77,16 @@ pipeline {
         // Thực hiện build và đóng gói ứng dụng thành Docker image
         stage('Docker Build') {
             when  {
-                expression { return env.TARGET_SERVICE }
+                expression { return env.TARGET_SERVICES }
             }
             steps{
                 script {
                     def jobs = [:]
-                    def services = env.TARGET_SERVICE.split(',')
+                    def services = env.TARGET_SERVICES.split(',')
                     // Duyệt từng service
                     services.each {
                         svc -> jobs["Build image: ${svc}"] {
-                            dir("app/octaltask-api/${svc}") {
+                            dir("app/octaltask-api/${svc}/") {
                                 echo "Starting build docker..."
                                 sh "docker build -t ${svc} ."
                             }
@@ -99,15 +99,15 @@ pipeline {
         // Đẩy repo image lên kho chứa Docker
         stage('Push Image to Docker Registry') {
             when  {
-                expression { return env.TARGET_SERVICE }
+                expression { return env.TARGET_SERVICES }
             }
             steps {
                 script {
                     def jobs = [:]
-                    def services = env.TARGET_SERVICE.split(',')
+                    def services = env.TARGET_SERVICES.split(',')
                     // Duyệt từng service
                     services.each {
-                        svc -> jobs["Push Image: ${svc}"] {
+                        svc -> jobs["Push Image: ${svc}"] { 
                             withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
                             def image = "${params.NAME_DOCKER}/task-management-${svc}:${params.TAG_NAME}"
                                 echo "Starting push image..."
