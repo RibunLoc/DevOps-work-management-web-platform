@@ -1,9 +1,22 @@
+// tạo hàm duyệt từng service
+def buildServices(noidung, lenhthucthi) {
+    def jobs = [:]
+    def services = env.TARGET_SERVICES.split(',')
+    services.each { svc ->
+        jobs["${noidung}: ${svc}"] = {
+            dir("app/octaltask-api/${svc}/") {
+                lenhthucthi(svc)
+            }
+        }
+    }
+    parallel jobs
+}
+
 pipeline {
     agent any
 
     // Cung cấp thông tin cần thiết cho pipeline
     parameters {
-        string(name: 'NAME_IMAGE', defaultValue: '', description: 'Tên thư mục service (ví dụ: auth-service)')
         string(name: 'TAG_NAME', defaultValue: 'v1.0', description: 'Tag image Docker')
         string(name: 'NAME_DOCKER', defaultValue: 'ribun', description: 'Docker username hoặc registry repo')
     }
@@ -58,43 +71,90 @@ pipeline {
             }
             steps {
                 script {
-                    def jobs = [:]
-                    def services = env.TARGET_SERVICES.split(',')
-                    // Duyệt từng service
-                    services.each {
-                        svc -> jobs["Cài đặt dependencies: ${svc}"] = {
-                            dir("app/octaltask-api/${svc}/") {
-                                echo "Starting install dependencies..."
-                                sh '''
-                                    npm install
-                                    npm run build
-                                '''
+                    buildServices("Cài đặt thư viện cần thiết npm") { svc ->
+                        echo "Bắt đầu quá trình cài đặt thư viện..."
+                        sh '''
+                            npm install
+                            npm run build
+                        '''
+                    }
+                }
+            }
+        }
+        // Phân tích mã nguồn đảm bảo Security
+        stage('Scan code') {
+            when {
+                expression { return env.TARGET_SERVICES }
+            }
+            parallel {
+                stage('Scan Code with SonarQube') {
+                    steps {
+                        script {
+                            buildServices("Sonar Scan") { svc ->
+                                echo "Sonar Server scan ${svc}..."
+                                sh """
+                                    ${SCANNER_HOME}/bin/sonar-scanner \
+                                    -Dsonar.projectName="Task_Management_Backend_Scan_Code" \
+                                    -Dsonar.projectKey="${svc}_taskmanagement_backend" \
+                                    -Dsonar.sources=.
+                                """
                             }
                         }
                     }
-                    parallel jobs
+                }
+
+                stage('Scan Code with Snyk') {
+                    steps {
+                        script {
+                            withCredentials([
+                                string(credentialsId: 'snyk', variable: 'SNYK_TOKEN')
+                            ]) {
+                                buildServices("Snyk Scan") { svc ->
+                                    echo "Snyk scan ${svc}..."
+                                    sh """
+                                        snyk auth ${SNYK_TOKEN}
+                                        snyk test . --all-projects \
+                                        --severity-threshold=medium \
+                                        --json > reports/snyk/snyk-report.json || true
+                                        snyk monitor --all-projects
+                                    """
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
         // Thực hiện build và đóng gói ứng dụng thành Docker image
         stage('Docker Build') {
-            when  {
+            when {
                 expression { return env.TARGET_SERVICES }
             }
-            steps{
+            steps {
                 script {
-                    def jobs = [:]
-                    def services = env.TARGET_SERVICES.split(',')
-                    // Duyệt từng service
-                    services.each {
-                        svc -> jobs["Build image: ${svc}"] = {
-                            dir("app/octaltask-api/${svc}/") {
-                                echo "Starting build docker..."
-                                sh "docker build -t ${svc} ."
-                            }
-                        }
+                    buildServices("Build Image") { svc ->
+                        echo("Bắt đầu quá trình build docker cho dịch vụ ${svc}...")
+                        sh "docker build -t ${svc} ."
                     }
-                    parallel jobs
+                }
+            }
+        }
+        // Đảm bảo image phải sạch bằng cách dùng trivy
+        stage('Trivy Scan Image') {
+            when {
+                expression { return env.TARGET_SERVICES }
+            }
+            steps {
+                buildServices("Trivy Scan") { svc ->
+                    echo "Bắt đầu quá trình scan Iamge ${svc}"
+                    sh """
+                        mkdir -p reports/trivy
+                        trivy image --severity MEDIUM,HIGH,CRITICAL \
+                        --exit-code 1 \
+                        --format json \
+                        --output reports/trivy/trivy-report-${svc}.json \
+                        "${svc}" || true
+                    """
                 }
             }
         }
@@ -104,23 +164,17 @@ pipeline {
                 expression { return env.TARGET_SERVICES }
             }
             steps {
-                script {
-                    def jobs = [:]
-                    def services = env.TARGET_SERVICES.split(',')
-                    // Duyệt từng service
-                    services.each {
-                        svc -> jobs["Push Image: ${svc}"] = { 
-                            withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
-                            def image = "${params.NAME_DOCKER}/task-management-${svc}:${params.TAG_NAME}"
-                                echo "Starting push image..."
-                                sh """
-                                    docker tag ${svc} ${image}
-                                    docker push ${image}
-                                """
-                            }
+                script { 
+                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
+                        buildServices("Đẩy Image lên repo ${params.NAME_DOCKER}") { svc ->
+                        def image = "${params.NAME_DOCKER}/task-management-${svc}:${params.TAG_NAME}"
+                        echo "Bắt đầu quá trình đẩy image..."
+                        sh """
+                            docker tag ${svc} ${image}
+                            docker push ${image}
+                        """
                         }
                     }
-                    parallel jobs
                 }
             }
         }
