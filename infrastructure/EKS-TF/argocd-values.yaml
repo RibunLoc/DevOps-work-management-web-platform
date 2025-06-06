@@ -11,13 +11,12 @@ server:
       alb.ingress.kubernetes.io/scheme: internet-facing
       alb.ingress.kubernetes.io/target-type: ip
       alb.ingress.kubernetes.io/backend-protocol: HTTP
-      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}, {"HTTPS":443}]'
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
       alb.ingress.kubernetes.io/group.name: "argocd-alb-group"
       alb.ingress.kubernetes.io/load-balancer-name: "alb-argocd"
-      alb.ingress.kubernetes.io/ssl-redirect: '443'
-    
+  
     hostname: "argocd.netsena.io.vn"
-    path: /*
+    path: /
     pathType: Prefix
     tls: false
 

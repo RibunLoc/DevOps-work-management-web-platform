@@ -20,7 +20,7 @@ grafana:
         - name: prometheus
           type: prometheus
           access: proxy
-          url: http://prometheus-operated.monitoring:9090
+          url: http://prometheus-prometheus-stack-kube-prom-prometheus.monitoring:9090
           isDefault: true
 
   ingress:

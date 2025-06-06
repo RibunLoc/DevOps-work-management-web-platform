@@ -91,19 +91,24 @@ pipeline {
                     steps {
                         script {
                             buildServices("Sonar Scan") { svc ->
-                                echo "Sonar Server scan ${svc}..."
-                                sh """
-                                    ${SCANNER_HOME}/bin/sonar-scanner \
-                                    -Dsonar.projectName="Task_Management_Backend_Scan_Code" \
-                                    -Dsonar.projectKey="${svc}_taskmanagement_backend" \
-                                    -Dsonar.sources=.
-                                """
+                                withSonarQubeEnv('sonar-server') {
+                                    echo "Sonar Server scan ${svc}..."
+                                    sh """
+                                        ${SCANNER_HOME}/bin/sonar-scanner \
+                                        -Dsonar.projectName="Task_Management_Backend_Scan_Code" \
+                                        -Dsonar.projectKey="${svc}_taskmanagement_backend" \
+                                        -Dsonar.sources=.
+                                    """ 
+                                }
+                                // Đợi kết quả đánh giá chất lượng từ sonar
+                                waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
                             }
                         }
                     }
                 }
 
                 stage('Scan Code with Snyk') {
+                    agent { label: 'agent1'}
                     steps {
                         script {
                             withCredentials([

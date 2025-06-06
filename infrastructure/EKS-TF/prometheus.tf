@@ -22,7 +22,7 @@ resource "helm_release" "prometheus" {
     values = [
         file("./prometheus-values.yaml")
     ]
-    timeout = 2000
+    timeout = 900
 
     set {
         name  = "grafana.resources.limits.cpu"
@@ -49,7 +49,7 @@ resource "helm_release" "prometheus" {
 resource "helm_release" "grafana_kubernetes_operator" {
     depends_on = [helm_release.aws-load-balancer-controller, kubernetes_namespace.name]
     name = "grafana-operator"
-    repository = "oci://ghcr.io/grafana/helm-charts"
+    repository = "https://grafana.github.io/helm-charts"
     chart = "grafana-operator"
     create_namespace = false
     namespace = kubernetes_namespace.name.id
