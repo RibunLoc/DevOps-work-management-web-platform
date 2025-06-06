@@ -108,7 +108,7 @@ pipeline {
                 }
 
                 stage('Scan Code with Snyk') {
-                    agent { label: 'agent1'}
+                    agent { label 'agent1' }
                     steps {
                         script {
                             withCredentials([
