@@ -1,40 +1,57 @@
-import { IsNotEmpty, IsString, IsOptional, IsBoolean } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsBoolean, IsNumber } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateTaskDto {
-    @ApiProperty({
-        description: 'Title of the task',
-        example: 'Updated project documentation',
-        required: true
-    })
-    @IsNotEmpty()
-    @IsString()
-    title: string;
+  @ApiProperty({
+    example: 'Updated task title',
+    description: 'Title of the task'
+  })
+  @IsNotEmpty()
+  @IsString()
+  title: string;
 
-    @ApiProperty({
-        description: 'Detailed description of the task',
-        example: 'Updated documentation with new architecture diagrams',
-        required: false
-    })
-    @IsString()
-    @IsOptional()
-    description?: string;
+  @ApiProperty({
+    example: 'Updated task description',
+    description: 'Description of the task',
+    required: false
+  })
+  @IsString()
+  @IsOptional()
+  description?: string;
 
-    @ApiProperty({
-        description: 'Flag indicating if the task is completed',
-        example: true,
-        required: false
-    })
-    @IsBoolean()
-    @IsOptional()
-    isCompleted?: boolean;
+  @ApiProperty({
+    example: true,
+    description: 'Completion status of the task',
+    required: false
+  })
+  @IsBoolean()
+  @IsOptional()
+  isCompleted?: boolean;
 
-    @ApiProperty({
-        description: 'Due date for the task (ISO string format)',
-        example: '2025-05-25T12:00:00Z',
-        required: false
-    })
-    @IsOptional()
-    @IsString()
-    dueDate?: string;
+  @ApiProperty({
+    example: true,
+    description: 'Whether the task has been started',
+    required: false
+  })
+  @IsBoolean()
+  @IsOptional()
+  isStarted?: boolean;
+
+  @ApiProperty({
+    example: '2023-12-31',
+    description: 'Due date of the task',
+    required: false
+  })
+  @IsOptional()
+  @IsString()
+  dueDate?: string;
+
+  @ApiProperty({
+    example: 2,
+    description: 'ID of the list this task belongs to',
+    required: false
+  })
+  @IsOptional()
+  @IsNumber()
+  listId?: number;
 }

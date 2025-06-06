@@ -13,7 +13,7 @@ interface SubtaskGrpcService {
 export class SubtaskService {
   private subtaskGrpcService: SubtaskGrpcService;
 
-  constructor(@Inject('TASK_PACKAGE') private readonly client: ClientGrpc) {}
+  constructor(@Inject('TASK_PACKAGE') private readonly client: ClientGrpc) { }
 
   onModuleInit() {
     this.subtaskGrpcService = this.client.getService<SubtaskGrpcService>('TaskService');

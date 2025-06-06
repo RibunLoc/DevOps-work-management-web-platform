@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package user;
+
+service UserService {
+  rpc GetCurrentUser (UserRequest) returns (UserResponse);
+  rpc UpdateCurrentUser (UpdateCurrentUserRequest) returns (UserResponse);
+  rpc ChangePassword (ChangePasswordRequest) returns (MessageResponse);
+  rpc DeleteCurrentUser (UserRequest) returns (MessageResponse);
+  rpc GetAllUsers (Empty) returns (UsersResponse);
+  rpc GetUserById (UserByIdRequest) returns (UserResponse);
+  rpc UpdateUserById (UpdateUserByIdRequest) returns (UserResponse);
+  rpc DeleteUserById (UserByIdRequest) returns (MessageResponse);
+}
+
+message User {
+  int32 userId = 1;
+  string email = 2;
+  string name = 3;
+  string role = 4;
+}
+
+message UserByIdRequest {
+  int32 id = 1;
+}
+
+message MessageResponse {
+  string message = 1;
+  User user = 2;
+}
+
+message UserResponse {
+  User user = 1;
+}
+
+message UserRequest {
+  User user = 1;
+}
+
+message UpdateCurrentUserRequest {
+  string email = 1;
+  string name = 2;
+  User user = 3;
+}
+
+message ChangePasswordRequest {
+  string currentPassword = 1;
+  string newPassword = 2;
+  User user = 3;
+}
+
+message UsersResponse {
+  repeated User users = 1;
+}
+
+message UpdateUserByIdRequest {
+  int32 id = 1;
+  string email = 2;
+  string name = 3;
+  string role = 4;
+}
+
+message Empty {
+}

@@ -20,4 +20,4 @@ import { getAuthGrpcClientOptions } from 'src/client-options/auth.grpc-client';
   providers: [AuthService],
   exports: [AuthService],
 })
-export class AuthModule {}
+export class AuthModule { }

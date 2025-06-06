@@ -5,6 +5,7 @@ resource "aws_instance" "ec2-Jenkins" {
   subnet_id        = aws_subnet.public-subnet-Jenkins-AZ1.id
   vpc_security_group_ids = [ aws_security_group.sg.id]
   iam_instance_profile = aws_iam_instance_profile.iam-instance-profile.name
+
   root_block_device {
     volume_size = 30
   }

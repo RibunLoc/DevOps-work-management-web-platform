@@ -41,7 +41,18 @@ services:
       - .env
     depends_on:
       - auth-service
-
     
-
-
+  user-service:
+    build:
+      context: .
+      args:
+        SERVICE: user-service
+        PORT: ${USER_PORT}
+    image: ribun/octaltask-backend-user-service:${TAG:-dev}
+    container_name: octaltask-backend-user-service
+    ports:
+      - "${USER_PORT}:${USER_PORT}"
+    env_file:
+      - .env
+    depends_on:
+      - api-gateway

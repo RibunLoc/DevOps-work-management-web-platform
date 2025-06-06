@@ -17,7 +17,7 @@ interface AuthGrpcService {
 export class AuthService implements OnModuleInit {
   private authGrpcService: AuthGrpcService;
 
-  constructor(@Inject('AUTH_PACKAGE') private readonly client: ClientGrpc) {}
+  constructor(@Inject('AUTH_PACKAGE') private readonly client: ClientGrpc) { }
 
   onModuleInit() {
     this.authGrpcService = this.client.getService<AuthGrpcService>('AuthService');

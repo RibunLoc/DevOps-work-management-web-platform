@@ -8,7 +8,7 @@ async function bootstrap() {
   const appContext = await NestFactory.createApplicationContext(AppModule);
   const configService = appContext.get(ConfigService);
 
-  const grpcUrl = configService.get<string>('GRPC_AUTH_URL');
+  const grpcUrl = configService.get<string>('GRPC_LISTEN_AUTH_URL');
 
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
     transport: Transport.GRPC,

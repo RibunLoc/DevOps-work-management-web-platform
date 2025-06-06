@@ -1,41 +1,41 @@
-import { IsNotEmpty, IsString, IsOptional} from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ListColor, ListType } from '../../../entities/list.entity';
+
+type ListType = 'personal' | 'work' | 'home' | 'study' | 'default';
+type ListColor = 'blue' | 'green' | 'red' | 'purple' | 'amber';
 
 export class CreateListDto {
-    @ApiProperty({
-        description: 'name of the List',
-        example: 'Complete project documentation',
-        required: true
-    })
-    @IsNotEmpty()
-    @IsString()
-    name: string;
+  @ApiProperty({ example: 'My List', description: 'The name of the list' })
+  @IsNotEmpty()
+  @IsString()
+  name: string;
 
-    @ApiProperty({
-        description: 'Detailed type of the list',
-        example: 'personal',
-        required: false
-    })
-    @IsString()
-    @IsOptional()
-    icon: ListType;
+  @ApiProperty({
+    example: 'work',
+    enum: ['personal', 'work', 'home', 'study', 'default'],
+    required: false,
+    description: 'Icon representing the list',
+  })
+  @IsString()
+  @IsOptional()
+  icon: ListType;
 
-    @ApiProperty({
-        description: 'Color:',
-        example: 'red',
-        required: false
-    })
-    @IsString()
-    @IsOptional()
-    color: ListColor;
+  @ApiProperty({
+    example: 'blue',
+    enum: ['blue', 'green', 'red', 'purple', 'amber'],
+    required: false,
+    description: 'Color of the list',
+  })
+  @IsString()
+  @IsOptional()
+  color: ListColor;
 
-    @ApiProperty({
-        description: 'Due date for the task (ISO string format)',
-        example: '2025-05-20T12:00:00Z',
-        required: false
-    })
-    @IsOptional()
-    @IsString()
-    dueDate?: string;
+  @ApiProperty({
+    example: '2023-12-31',
+    required: false,
+    description: 'Optional due date for the list',
+  })
+  @IsOptional()
+  @IsString()
+  dueDate?: string;
 }

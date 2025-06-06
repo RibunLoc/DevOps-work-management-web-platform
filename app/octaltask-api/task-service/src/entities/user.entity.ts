@@ -30,7 +30,7 @@ export class User {
 
   @OneToMany(() => Task, (task) => task.createdBy)
   tasks: Task[];
-  
+
   @Column({ nullable: true })
   resetToken: string;
 

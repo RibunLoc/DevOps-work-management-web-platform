@@ -1,0 +1,74 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'BRANCH', defaultValue: 'develop', description: 'Nhánh Git cần kiểm tra')
+        string(name: 'TAG', defaultValue: 'v1.0', description: 'Tag Docker image')
+    }
+
+    environment {
+        REPO_URL = 'https://github.com/RibunLoc/DevOps-work-management-web-platform.git'
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: params.BRANCH, url: env.REPO_URL
+            }
+        }
+
+        stage('Detect Changed Services') {
+            steps {
+                script {
+                    sh "git fetch origin"
+                    def current = sh(script: "git rev-parse origin/${params.BRANCH}", returnStdout: true).trim()
+                    def previous = sh(script: "git rev-parse origin/${params.BRANCH}~1", returnStdout: true).trim()
+
+                    echo "kiểm tra service nào cập nhật: ${previous}..${current}"
+                    def changedFiles = sh(
+                        script: "git diff --name-only ${previous} ${current}",
+                        returnStdout: true
+                    ).trim().split("\n")
+                    echo "Những file thay đổi:\n${changedFiles.join('\n')}"
+
+                    def services = []
+
+                    if (changedFiles.any { it.startsWith("app/octaltask-api/api-gateway/") }) {
+                        services << "api"
+                    }
+                    if (changedFiles.any { it.startsWith("app/octaltask-api/auth-service/") }) {
+                        services << "auth"
+                    }
+                    if (changedFiles.any { it.startsWith("app/octaltask-api/file-service/") }) {
+                        services << "file"
+                    }
+                    if (changedFiles.any { it.startsWith("app/octaltask-api/task-service/") }) {
+                        services << "task"
+                    }
+                    if (changedFiles.any { it.startsWith("app/octaltask-api/user-service/") }) {
+                        services << "user"
+                    }
+
+                    if (services.isEmpty()) {
+                        echo "🟡 Không có thay đổi liên quan đến các dịch vụ cần build. Kết thúc pipeline."
+                        currentBuild.result = 'SUCCESS'
+                        return
+                    }
+
+                    echo "📦 Các service thay đổi: ${services.join(', ')}"
+
+                    def jobs = services.collectEntries { svc ->
+                        ["Build-${svc}": {
+                            build job: 'microservice-deploy', wait: true, parameters: [
+                                string(name: 'SERVICE', value: svc),
+                                string(name: 'TAG', value: params.TAG)
+                            ]
+                        }]
+                    }
+
+                    parallel jobs
+                }
+            }
+        }
+    }
+}

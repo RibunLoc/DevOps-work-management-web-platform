@@ -1,5 +1,5 @@
 import { JwtService } from '@nestjs/jwt';
-import { BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, NotFoundException, UnauthorizedException, Inject, Logger } from '@nestjs/common';
 import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -8,12 +8,25 @@ import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { addMinutes } from 'date-fns';
 import { MailerService } from 'src/mailer/mailer.service';
-import { LoginDto } from './dto/login.dto';
 import { SignupDto } from './dto/signup.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ClientGrpc } from '@nestjs/microservices';
+import { firstValueFrom, timeout } from 'rxjs';
+
+// Interface for Task Service gRPC methods
+interface TaskGrpcService {
+  createDefaultUserSetup(data: {
+    userId: number;
+    email: string;
+    name: string;
+    role?: string;
+  }): any;
+}
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+  private taskGrpcService: TaskGrpcService;
 
   [x: string]: any;
   getHello(): string {
@@ -25,7 +38,13 @@ export class AuthService {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly mailerService: MailerService,
+    @Inject('TASK_PACKAGE') private readonly taskClient: ClientGrpc // Add this injection
   ) { }
+
+  // Initialize gRPC service connection
+  onModuleInit() {
+    this.taskGrpcService = this.taskClient.getService<TaskGrpcService>('TaskService');
+  }
 
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.userRepo.findOne({ where: { email } });
@@ -41,9 +60,9 @@ export class AuthService {
     const { password: _, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }
-  
+
   async login(user: any) {
-    const payload = { email: user.email, sub: user.id, role: user.role };
+    const payload = { email: user.email, sub: user.id, name: user.name, role: user.role };
     return {
       accessToken: this.jwtService.sign(payload),
     };
@@ -58,8 +77,39 @@ export class AuthService {
     const user = this.userRepo.create({ email, password: hashed, name });
     const savedUser = await this.userRepo.save(user);
 
+    // Create default setup in task service after user creation
+    try {
+      await this.createDefaultTaskSetup(savedUser);
+    } catch (error) {
+      this.logger.warn(`Failed to create default task setup for user ${savedUser.id}: ${error.message}`);
+      // Don't fail the signup if task setup fails, just log the warning
+    }
+
     const { password: _, resetToken, resetTokenExpires, ...safeUser } = savedUser;
     return safeUser;
+  }
+
+  private async createDefaultTaskSetup(user: User) {
+    try {
+      const setupData = {
+        userId: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role || 'user'
+      };
+
+      // Call task service to create default lists and tasks
+      const result = await firstValueFrom(
+        this.taskGrpcService.createDefaultUserSetup(setupData).pipe(
+          timeout(10000) // 10 second timeout
+        )
+      );
+
+      return result;
+    } catch (error) {
+      this.logger.error(`Failed to create default task setup for user ${user.id}:`, error);
+      throw error;
+    }
   }
 
   async requestPasswordReset(email: string) {
@@ -97,7 +147,7 @@ export class AuthService {
     try {
       // Find the user in the database by ID
       const user = await this.userRepo.findOne({ where: { id: userId } });
-      
+
       if (!user) {
         throw new NotFoundException('User not found');
       }
@@ -105,7 +155,7 @@ export class AuthService {
       // Return user without sensitive information
       const { password, resetToken, resetTokenExpires, ...safeUser } = user;
       return safeUser;
-      
+
     } catch (error) {
       // Rethrow the error (like NotFoundException)
       throw error;

@@ -1,4 +1,3 @@
-// src/task/entities/comment.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
 import { User } from './user.entity';
 import { Task } from './task.entity';

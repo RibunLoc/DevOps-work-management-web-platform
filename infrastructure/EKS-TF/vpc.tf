@@ -4,15 +4,15 @@ module "vpc" {
   vpc-name = var.vpc-name
   cidr_block = "10.0.0.0/16"
   azs = [var.region-az1, var.region-az2]
-  subnet_public_name = ["10.0.1.0/24", "10.0.2.0/24"]
-  subnet_private_name = ["10.0.3.0/24", "10.0.4.0/24"]
+  subnet_public_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
+  subnet_private_cidrs = ["10.0.3.0/24", "10.0.4.0/24"]
 }
 
 // Tạo Internet Gateway cho VPC
 resource "aws_internet_gateway" "igw" {
   vpc_id = module.vpc.vpc_id
   tags = {
-    Name = var.igw-name
+    Name = "VPC-2tier-IGW"
   }
 }
 
@@ -23,12 +23,13 @@ module "nat-gateway-az1" {
   depends_on = [ aws_internet_gateway.igw]
 }
 
-// Tạo NAT Gateway cho subnet private backend AZ2
-module "nat-gateway-az2" {
-  source = "../modules/natgw"
-  public_subnet_id = module.vpc.public_subnet_ids[1] # Subnet public AZ2 
-  depends_on = [aws_internet_gateway.igw]
-}
+# Không cần thiết cho môi trường development 
+# // Tạo NAT Gateway cho subnet private backend AZ2
+# module "nat-gateway-az2" {
+#   source = "../modules/natgw"
+#   public_subnet_id = module.vpc.public_subnet_ids[1] # Subnet public AZ2 
+#   depends_on = [aws_internet_gateway.igw]
+# }
 
 // Tạo Route Table cho public
 module "route-table-public" {
@@ -48,7 +49,8 @@ module "route-table-private-az1" {
   source = "../modules/route_table"
   name = "private-rtb-az1"
   vpc_id = module.vpc.vpc_id
-  subnet_ids = [module.vpc.private_subnet_ids[0]]
+  subnet_ids = [module.vpc.private_subnet_ids[0], module.vpc.private_subnet_ids[1]]
+  depends_on = [module.nat-gateway-az1]
 
   routes = [{
     cidr_block = "0.0.0.0/0",
@@ -56,70 +58,79 @@ module "route-table-private-az1" {
   }]
 }
 
-// Tạo Route Table cho private backend AZ2
-module "route-table-priavte-az2" {
-  source = "../modules/route_table"
-  name = "private-rtb-az2"
-  vpc_id = module.vpc.vpc_id
-  subnet_ids = [module.vpc.private_subnet_ids[1]]
-
-  routes =[{
-    cidr_block = "0.0.0.0/0",
-    nat_gateway_id = module.nat-gateway-az2.aws_nat_gateway_id
-  }]
-}
-
-// Tạo Security Group cho ALB (External)
-# module "security_group_ALB" {
-#   source = "terraform-aws-modules/security-group/aws"
-#   version = "~> 4.0"
-
-#   name = var.ALB-SG-name
-#   description = "Cho phep luu luong HTTP va HTTPS truy cap vao ALB"
+# // Tạo Route Table cho private backend AZ2
+# module "route-table-private-az2" {
+#   source = "../modules/route_table"
+#   name = "private-rtb-az2"
 #   vpc_id = module.vpc.vpc_id
-  
+#   subnet_ids = [module.vpc.private_subnet_ids[1]]
 
-#   ingress_with_cidr_blocks = [
-#     {
-#       from_port   = 0
-#       to_port     = 0
-#       protocol    = "-1"
-#       description = "User-service ports"
-#       cidr_block  = "0.0.0.0/0"
-#     }
-#   ]
-   
-#   egress_rules = ["all-all"]
-  
-#   tags = {
-#     Name = "SG-vpc-3tier"
-#   }
+#   routes =[{
+#     cidr_block = "0.0.0.0/0",
+#     nat_gateway_id = module.nat-gateway-az1.aws_nat_gateway_id
+#   }]
 # }
 
+// Tạo Security Group cho ALB (External)
+module "security_group_ALB" {
+  source = "terraform-aws-modules/security-group/aws"
+  version = "~> 4.0"
+
+  name = var.ALB-SG-name-external
+  description = "Cho phep luu luong HTTP va HTTPS truy cap vao ALB"
+  vpc_id = module.vpc.vpc_id
+  
+  ingress_with_cidr_blocks = [
+  {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = "0.0.0.0/0"
+  },
+  {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = "0.0.0.0/0"
+  }
+]
+   
+  egress_rules = ["all-all"]
+  
+  tags = {
+    Name = "SG-vpc-3tier"
+  }
+}
+
 // Tạo Security Group cho Public subnet 
-module "security_group_subnet_public" {
+module "security_group_FrontEnd" {
   source = "terraform-aws-modules/security-group/aws"
   version = "~> 4.0"
 
   # depends_on = [module.aws_load_balancer]
-  description = "Cho phep luu luong mang truy cap tu ALB den tang subnet public"
+  description = "Cho phep luu luong ALB den tang subnet public"
   name = var.Web-FrontEnd-SG-name
   vpc_id = module.vpc.vpc_id
   
-
-  # ingress_with_source_security_group_id = [
-  #   {
-  #     description               = "Allow alb inbound traffic to public subnet"
-  #     from_port                 = 0
-  #     to_port                   = 0
-  #     protocol                  = "-1"
-  #     source_security_group_id  = module.aws_load_balancer.security_group_id
-  #   }
-  # ]
-
-  ingress_rules = [ "all-all" ]
-
-  // Egress: cho phép all-outbound ra Internet
+  # Ingress: cho phép HTTP và HTTPS từ Internet
+  ingress_with_source_security_group_id = [
+    {
+      description               = "Cho phep luu luong HTTP truy cap tu ALB den public subnet"
+      from_port                 = 80
+      to_port                   = 80
+      protocol                  = "tcp"
+      source_security_group_id  = module.security_group_ALB.security_group_id
+    },
+    {
+      description               = "Cho phep luu luong HTTPS truy cap tu ALB den public subnet"
+      from_port                 = 443
+      to_port                   = 443
+      protocol                  = "tcp"
+      source_security_group_id  = module.security_group_ALB.security_group_id
+    }
+  ]
+ 
+  # Egress: cho phép all-outbound ra Internet
   egress_rules = [ "all-all" ]
   
   tags = {
@@ -127,13 +138,12 @@ module "security_group_subnet_public" {
   }
 }
 
-
 // Tạo Security Group cho tầng Backend từ public subnet xuống
-module "security_group_Worker_Node" {
+module "security_group_BackEnd" {
   source = "terraform-aws-modules/security-group/aws"
   version = "~> 4.0"
 
-  depends_on = [module.security_group_subnet_public]
+  depends_on = [module.security_group_FrontEnd]
   name = var.Web-BackEnd-SG-name
   description = "Cho phep luu luong truy cap tu ALB internal den tang backend"
   vpc_id = module.vpc.vpc_id
@@ -143,21 +153,21 @@ module "security_group_Worker_Node" {
       description = "Cho phep luu luong tu public subnet den"
       from_port = 0
       to_port = 0
-      protocol = "-1"
-      source_security_group_id = module.security_group_subnet_public.security_group_id
+      protocol = "tcp"
+      source_security_group_id = module.security_group_FrontEnd.security_group_id
     }
   ]
 
   egress_rules = [ "all-all" ]
   
-
   tags = {
     Name = "SG-vpc-3tier"
   }
-
 }
 
-// Lấy thông tin Security Group mặc định của VPC
+
+/*Lấy thông tin Security Group mặc định của VPC để gắn vào eks cluster mặc định
+ chỉ phù hợp cho môi trường development*/
 data "aws_security_group" "sg-default" {
   filter {
     name   = "vpc-id"
@@ -170,83 +180,49 @@ data "aws_security_group" "sg-default" {
   }
 }
 
-# module "aws_load_balancer"{
-#   source  = "terraform-aws-modules/alb/aws"
-#   version = "9.16.0"
+# Tạo security Group cho EKS Cluster
+module "eks_cluster_sg" {
+  source         = "terraform-aws-modules/security-group/aws"
 
-#   name = "alb-public-subnet"
+  name           = "eks-cluster-sg"
+  vpc_id         = module.vpc.vpc_id
 
-#   vpc_id = module.vpc.vpc_id
-#   subnets = [module.vpc.public_subnet_ids[0], module.vpc.public_subnet_ids[1]]
+  ingress_with_cidr_blocks = [
+    {
+      description = "Quy dinh ip cu the duoc phep truy cap den EKS Cluster"
+      from_port   = 443
+      to_port     = 443
+      protocol    = "tcp"
+      cidr_blocks = "0.0.0.0/0" # thay bằng IP của bạn hoặc CIDR block của mạng nội bộ
+    },
+    {
+      description = "Cho phep HTTP truy cap den EKS Cluster"
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      cidr_blocks = "0.0.0.0/0"
+    }
+  ]
 
-#   security_group_ingress_rules = {
-#     all_http = {
-#       from_port   = 80
-#       to_port     = 80
-#       ip_protocol = "tcp"
-#       description = "HTTP web traffic"
-#       cidr_ipv4   = "0.0.0.0/0"
-#     }
-#     all_https = {
-#       from_port = 443
-#       to_port   = 443
-#       ip_protocol = "tcp"
-#       description = "HTTPS web traffic"
-#       cidr_ipv4   = "0.0.0.0/0"
-#     }
-#   }
-#   security_group_egress_rules = {
-#     all = {
-#       ip_protocol = "-1"
-#       cidr_ipv4 = "10.0.0.0/16"
-#     }
-#   }
+  egress_with_cidr_blocks = [
+    {
+      from_port  = 0
+      to_port    = 0
+      protocol   = "-1"
+      cidr_blocks = "0.0.0.0/0"
+    }
+  ]
 
-#   access_logs = {
-#     bucket = "terraform-task-management-2222"
-#   }
+  tags = {
+    Name = "SG-vpc-3tier"
+  }
+}
 
-#   target_groups = [
-#     {
-#       name_prefix = "h1"
-#       protocol = "HTTP"
-#       backend_port     = 80
-#       target_type = "ip"
-#       vpc_id = module.vpc.vpc_id
-#       health_check = {
-#         path = "/"
-#         interval = 30
-#         timeout  = 5
-#         healthy_threshold = 2
-#         unhealthy_threshold = 2
-#       }
+output "security_group_BackEnd" {
+  value = module.security_group_BackEnd.security_group_id
+}
 
-#       targets = [
-#         {
-#           target_id = "10.0.1.10"      # hoặc module.app.private_ip
-#           port      = 80
-#         }
-#       ]
-#     }
-#   ]
-
-#   listeners = [
-#     {
-#       port     = 80
-#       protocol = "HTTP"
-
-#       default_action = {
-#         type = "forward"
-#         target_group_index = 0
-#       }
-#     }
-    
-#   ]
-
-#   tags = {
-#     Environment = "dev"
-#     Project     = "vpc-3tier"
-#   }
-# }
-
+output "security_group_FrontEnd" {
+  value = module.security_group_FrontEnd.security_group_id
+}
 

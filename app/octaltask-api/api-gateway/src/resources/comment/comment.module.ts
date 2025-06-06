@@ -33,4 +33,4 @@ import { getTaskGrpcClientOptions } from 'src/client-options/task.grpc-client';
   controllers: [CommentController],
   providers: [CommentService],
 })
-export class CommentModule {}
+export class CommentModule { }

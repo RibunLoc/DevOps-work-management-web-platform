@@ -1,56 +1,120 @@
-resource "aws_eks_node_group" "eks_node_group_private" {
-  cluster_name = aws_eks_cluster.eks-cluster.name
-  node_group_name = var.eks-node-group-name
-  node_role_arn = aws_iam_role.NodeGroupRole.arn
-  subnet_ids = [module.vpc.private_subnet_ids[0], module.vpc.private_subnet_ids[1]]
+data "aws_ami" "eks_worker" {
+  most_recent = true
+  owners      = ["602401143452"]
+
+  filter {
+    name   = "name"
+    values = ["amazon-eks-node-1.29-v*"]
+  }
+}
+
+
+# khai báo lauch tmplate dành cho frontend 
+resource "aws_launch_template" "eks_node_group_frontend" {
+  name_prefix = "eks-node-group-"
+  image_id    = data.aws_ami.eks_worker.id
+  instance_type = var.instance_type
+  key_name = "ssh_key"
   
-scaling_config {
-    desired_size = 1
-    max_size = 1
-    min_size = 1
-}
-
-  ami_type = "AL2_x86_64"
-  instance_types = ["t2.medium"]
-  disk_size      = 20
-
-    depends_on = [ 
-        aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
-        aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
-        aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly
-     ]
-
-    tags = {
-        Name = "${var.cluster-name}-node-group-priavte"
-        Environment = "dev" 
+  block_device_mappings {
+    device_name = "/dev/xvda"   
+    ebs {
+      volume_size           = 40    
+      volume_type           = "gp2"  
+      delete_on_termination = true
     }
+  } 
+
+  user_data = base64encode(<<-EOF
+    #!/bin/bash
+    sudo yum update -y
+    sudo yum install -y iscsi-initiator-utils nfs-utils
+    sudo systemctl enable --now iscsid
+    /etc/eks/bootstrap.sh ${aws_eks_cluster.eks-cluster.name}
+  EOF
+  )
 }
 
-
-resource "aws_eks_node_group" "eks_node_group_public" {
-  cluster_name = aws_eks_cluster.eks-cluster.name
-  node_group_name = "node-group-public-group"
-  node_role_arn = aws_iam_role.NodeGroupRole.arn
-  subnet_ids = [module.vpc.public_subnet_ids[0], module.vpc.public_subnet_ids[1]]
+# khai báo launch templatte dành cho backend
+resource "aws_launch_template" "eks_node_group_backend" {
+  name_prefix = "eks-node-group-"
+  image_id    = data.aws_ami.eks_worker.id
+  instance_type = var.instance_type
+  key_name = "ssh_key"
   
-scaling_config {
-    desired_size = 1
-    max_size = 1
-    min_size = 1
+  block_device_mappings {
+    device_name = "/dev/xvda"   
+    ebs {
+      volume_size           = 40    
+      volume_type           = "gp2"  
+      delete_on_termination = true
+    }
+  }
+
+  user_data = base64encode(<<-EOF
+    #!/bin/bash
+    sudo yum update -y
+    sudo yum install -y iscsi-initiator-utils nfs-utils
+    sudo systemctl enable --now iscsid
+    /etc/eks/bootstrap.sh ${aws_eks_cluster.eks-cluster.name}
+  EOF
+  )
 }
 
-  ami_type = "AL2_x86_64"
-  instance_types = ["t2.medium"]
-  disk_size      = 20
+resource "aws_eks_node_group" "eks_node_group_backend" {
+  cluster_name = aws_eks_cluster.eks-cluster.name
+  node_group_name = "node-group-backend"
+  node_role_arn = aws_iam_role.NodeGroupRole.arn
+  subnet_ids = module.vpc.private_subnet_ids
 
-    depends_on = [ 
-        aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
-        aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
-        aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly
-     ]
+  scaling_config {
+    desired_size = 2
+    max_size = 3
+    min_size = 1
+  }
 
-    tags = {
-        Name = "${var.cluster-name}-node-group-public"
-        Environment = "dev" 
-    }
+  launch_template {
+    id = aws_launch_template.eks_node_group_backend.id
+    version = aws_launch_template.eks_node_group_backend.latest_version
+  }
+
+  depends_on = [ 
+    aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly
+  ]
+
+  tags = {
+      Name = "${var.cluster_name}-node-group-backend"
+      Environment = "dev" 
+  }
+}
+
+resource "aws_eks_node_group" "eks_node_group_frontend" {
+  cluster_name = aws_eks_cluster.eks-cluster.name
+  node_group_name = "node-group-frontend"
+  node_role_arn = aws_iam_role.NodeGroupRole.arn
+  subnet_ids = module.vpc.private_subnet_ids
+  
+  scaling_config {
+      desired_size = 2
+      max_size = 3
+      min_size = 1
+  }
+
+  launch_template {
+    id = aws_launch_template.eks_node_group_frontend.id
+    version = aws_launch_template.eks_node_group_frontend.latest_version
+  }
+
+  depends_on = [ 
+    aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly
+  ]
+
+  tags = {
+      Name = "${var.cluster_name}-node-group-frontend"
+      Environment = "dev" 
+  }
 }

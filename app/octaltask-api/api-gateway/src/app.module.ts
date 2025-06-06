@@ -10,6 +10,7 @@ import { CommentModule } from './resources/comment/comment.module';
 import { SubtaskModule } from './resources/subtask/subtask.module';
 import { ListController } from './resources/list/list.controller';
 import { ListModule } from './resources/list/list.module';
+import { UserModule } from './resources/user/user.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { ListModule } from './resources/list/list.module';
     TaskModule,
     CommentModule,
     SubtaskModule,
-    ListModule
+    ListModule,
+    UserModule
   ],
   controllers: [AppController, AuthController, ListController],
   providers: [AppService],

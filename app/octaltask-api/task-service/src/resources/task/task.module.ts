@@ -4,14 +4,14 @@ import { TaskController } from './task.controller';
 import { Task } from 'src/entities/task.entity';
 import { User } from 'src/entities/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule} from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { Comment } from '../../entities/comment.entity';
 import { Subtask } from '../../entities/subtask.entity';
 import { List } from 'src/entities/list.entity';
 
 @Module({
   imports: [
-    ConfigModule, 
+    ConfigModule,
     TypeOrmModule.forFeature([Task]),
     TypeOrmModule.forFeature([User]),
     TypeOrmModule.forFeature([Comment]),
@@ -21,4 +21,4 @@ import { List } from 'src/entities/list.entity';
   controllers: [TaskController],
   providers: [TaskService],
 })
-export class TaskModule {}
+export class TaskModule { }

@@ -16,8 +16,6 @@ async function bootstrap() {
     .setTitle('Octaltask API Documentation')
     .setDescription('Documentation for Octaltask application')
     .setVersion('1.0')
-    .addTag('Authentication', 'Authentication endpoints for login, signup, password reset')
-    .addTag('Task', 'Task management operations')
     .addBearerAuth(
       {
         type: 'http',
@@ -29,7 +27,10 @@ async function bootstrap() {
       },
       'accessToken',
     )
+    .addTag('Authentication', 'Endpoints for user authentication and authorization')
+    .addTag('Comments', 'Endpoints for comments management')
     .build();
+    
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
 

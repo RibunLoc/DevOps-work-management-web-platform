@@ -1,10 +1,15 @@
-// src/task/entities/list.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, ManyToOne } from 'typeorm';
 import { Task } from './task.entity';
 import { User } from './user.entity';
+import { ListShared } from './list-shared.entity';
 
 export type ListType = 'personal' | 'work' | 'home' | 'study' | 'default';
 export type ListColor = 'blue' | 'green' | 'red' | 'purple' | 'amber';
+export enum ListRole {
+  EDITER = 'editer',
+  VIEWER = 'viewer',
+  ADMIN = 'admin',
+}
 
 @Entity('lists')
 export class List {
@@ -29,5 +34,12 @@ export class List {
   @ManyToOne(() => User, (user) => user.lists, { onDelete: 'CASCADE' })
   user: User;
 
-  createdBy: any;
+  @OneToMany(() => ListShared, (listShared) => listShared.list)
+  sharedUsers: ListShared[];
+
+  @Column()
+  createdBy: number;
+
+  @CreateDateColumn()
+  createdAt: Date;
 }
