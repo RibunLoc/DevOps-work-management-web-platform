@@ -34,7 +34,7 @@ pipeline {
                     def folders = ['api-gateway', 'auth-service', 'task-service', 'user-service', 'file-service']
                     def changedServices = folders.findAll{
                         svc -> changes.any { 
-                            it.startsWith("app/octaltask-api/${svc}") 
+                            it.startsWith("app/octaltask-api/${svc}/") 
                         }
                     }
 
