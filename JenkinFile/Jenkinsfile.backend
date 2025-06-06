@@ -22,37 +22,30 @@ pipeline {
                 checkout scm
             }
         }
-        // Thiết lập biến môi trường cần thiết cho quá trình build
-        stage('SET UP ENVIRONMENT') {
-            steps {
-                script {
-                    REPO_IMAGE = "${params.NAME_DOCKER}/${params.NAME_IMAGE}:${params.TAG_NAME}"
-                }
-            }
-        }
         // Kiểm tra từng dịch vụ xem có sự cập nhật hay không bằng cách so sánh khác biệt của base cũ và mới
         stage('Detect Changed Folder') {
             steps {
                 script {
                     sh 'git fetch origin'
-
                     def branch = env.BRANCH_NAME ?: 'develop'
                     def base = sh(script: "git merge-base HEAD origin/${branch}", returnStdout: true).trim()
                     def changes = sh(script: "git diff --name-only ${base}..HEAD", returnStdout: true).trim().split("\n")
 
                     def folders = ['api-gateway', 'auth-service', 'task-service', 'user-service', 'file-service']
-                    def target = folders.find { svc ->
-                        changes.any { it.startsWith("app/octaltask-api/${svc}/") }
+                    def changedServices = folders.findAll{
+                        svc -> changes.any { 
+                            it.startsWith("app/octaltask-api/${svc}") 
+                        }
                     }
 
-                    if (!target) {
-                        echo "Không phát hiện service thay đổi. Kết thúc."
+                    if (changedServices.isEmpty()) {
+                        echo "Không phát hiện service nào thay đổi. Kết thúc pipeline"
                         currentBuild.result = 'SUCCESS'
                         return
                     }
 
-                    echo "Build service: ${target}"
-                    env.TARGET_SERVICE = target
+                    echo "Những dịch vụ cần build: ${changedServices.join(', ')}"
+                    env.TARGET_SERVICE = changedServices.join(',')
                 }
             }
         }
@@ -62,14 +55,23 @@ pipeline {
                 expression { return env.TARGET_SERVICE }
             }
             steps {
-                dir("app/octaltask-api/${env.TARGET_SERVICE}") {
-                    script {
-                        sh '''
-                            npm install
-                            npm run build
-                        '''
+                script {
+                    def jobs = [:]
+                    def services = env.TARGET_SERVICE.split(',')
+                    // Duyệt từng service
+                    services.each {
+                        svc -> jobs["Cài đặt dependencies: ${svc}"] {
+                            dir("app/octaltask-api/${svc}") {
+                                echo "Starting install dependencies..."
+                                sh '''
+                                    npm install
+                                    npm run build
+                                '''
+                            }
+                        }
                     }
                 }
+                parallel jobs
             }
         }
         // Thực hiện build và đóng gói ứng dụng thành Docker image
@@ -78,11 +80,20 @@ pipeline {
                 expression { return env.TARGET_SERVICE }
             }
             steps{
-                dir("app/octaltask-api/${env.TARGET_SERVICE}") {
-                    script {
-                        sh "docker build -t ${params.NAME_IMAGE} ."
+                script {
+                    def jobs = [:]
+                    def services = env.TARGET_SERVICE.split(',')
+                    // Duyệt từng service
+                    services.each {
+                        svc -> jobs["Build image: ${svc}"] {
+                            dir("app/octaltask-api/${svc}") {
+                                echo "Starting build docker..."
+                                sh "docker build -t ${svc} ."
+                            }
+                        }
                     }
                 }
+                parallel jobs
             }
         }
         // Đẩy repo image lên kho chứa Docker
@@ -92,13 +103,23 @@ pipeline {
             }
             steps {
                 script {
-                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
-                        sh """
-                            docker tag ${params.NAME_IMAGE} ${REPO_IMAGE}
-                            docker push ${REPO_IMAGE}
-                        """
+                    def jobs = [:]
+                    def services = env.TARGET_SERVICE.split(',')
+                    // Duyệt từng service
+                    services.each {
+                        svc -> jobs["Push Image: ${svc}"] {
+                            withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
+                            def image = "${params.NAME_DOCKER}/task-management-${svc}:${params.TAG_NAME}"
+                                echo "Starting push image..."
+                                sh """
+                                    docker tag ${svc} ${image}
+                                    docker push ${image}
+                                """
+                            }
+                        }
                     }
                 }
+                parallel jobs
             }
         }
     }
