@@ -27,7 +27,7 @@ pipeline {
             steps {
                 script {
                     sh 'git fetch origin'
-                    
+
                     def changes = sh(
                         script: "git diff --name-only HEAD~1 HEAD",
                         returnStdout: true
@@ -62,7 +62,7 @@ pipeline {
                     def services = env.TARGET_SERVICES.split(',')
                     // Duyệt từng service
                     services.each {
-                        svc -> jobs["Cài đặt dependencies: ${svc}"] {
+                        svc -> jobs["Cài đặt dependencies: ${svc}"] = {
                             dir("app/octaltask-api/${svc}/") {
                                 echo "Starting install dependencies..."
                                 sh '''
@@ -87,7 +87,7 @@ pipeline {
                     def services = env.TARGET_SERVICES.split(',')
                     // Duyệt từng service
                     services.each {
-                        svc -> jobs["Build image: ${svc}"] {
+                        svc -> jobs["Build image: ${svc}"] = {
                             dir("app/octaltask-api/${svc}/") {
                                 echo "Starting build docker..."
                                 sh "docker build -t ${svc} ."
@@ -109,7 +109,7 @@ pipeline {
                     def services = env.TARGET_SERVICES.split(',')
                     // Duyệt từng service
                     services.each {
-                        svc -> jobs["Push Image: ${svc}"] { 
+                        svc -> jobs["Push Image: ${svc}"] = { 
                             withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
                             def image = "${params.NAME_DOCKER}/task-management-${svc}:${params.TAG_NAME}"
                                 echo "Starting push image..."
