@@ -27,10 +27,9 @@ pipeline {
             steps {
                 script {
                     sh 'git fetch origin'
-
-                    def branch = env.BRANCH_NAME ?: 'develop'
+                    
                     def changes = sh(
-                        script: "git diff --name-only origin/${branch}...HEAD",
+                        script: "git diff --name-only HEAD~1 HEAD",
                         returnStdout: true
                     ).trim().split("\n")
 
