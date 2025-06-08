@@ -1,11 +1,11 @@
 services:
   api-gateway:
-    build:
-      context: .
-      args:
-        SERVICE: api-gateway
-        PORT: ${SERVER_PORT}
-    image: ribun/octaltask-backend-api-gateway:${TAG:-dev}
+    # build:
+    #   context: .
+    #   args:
+    #     SERVICE: api-gateway
+    #     PORT: ${SERVER_PORT}
+    image: ribun/task-management-api-gateway:v1.0 #ribun/octaltask-backend-api-gateway:${TAG:-dev}
     container_name: octaltask-backend-api-gateway
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
@@ -13,12 +13,12 @@ services:
       - .env
  
   auth-service:
-    build:
-      context: .
-      args:
-        SERVICE: auth-service
-        PORT: ${AUTH_PORT}
-    image: ribun/octaltask-backend-auth-service:${TAG:-dev}
+    # build:
+    #   context: .
+    #   args:
+    #     SERVICE: auth-service
+    #     PORT: ${AUTH_PORT}
+    image: ribun/task-management-auth-service:v1.0
     container_name: octaltask-backend-auth-service
     ports:
       - "${AUTH_PORT}:${AUTH_PORT}"
@@ -28,12 +28,12 @@ services:
       - api-gateway
 
   task-service:
-    build:
-      context: .
-      args:
-        SERVICE: task-service
-        PORT: ${TASK_PORT}
-    image: ribun/octaltask-backend-task-service:${TAG:-dev}
+    # build:
+    #   context: .
+    #   args:
+    #     SERVICE: task-service
+    #     PORT: ${TASK_PORT}
+    image: ribun/task-management-task-service:v1.0
     container_name: octaltask-backend-task-service
     ports:
       - "${TASK_PORT}:${TASK_PORT}"
@@ -43,12 +43,12 @@ services:
       - auth-service
     
   user-service:
-    build:
-      context: .
-      args:
-        SERVICE: user-service
-        PORT: ${USER_PORT}
-    image: ribun/octaltask-backend-user-service:${TAG:-dev}
+    # build:
+    #   context: .
+    #   args:
+    #     SERVICE: user-service
+    #     PORT: ${USER_PORT}
+    image:  ribun/task-management-user-service:v1.0
     container_name: octaltask-backend-user-service
     ports:
       - "${USER_PORT}:${USER_PORT}"

@@ -97,56 +97,56 @@ pipeline {
             }
         }
         // Phân tích mã nguồn đảm bảo Security
-        // stage('Scan code') {
-        //     when {
-        //         expression { return env.TARGET_SERVICES }
-        //     }
-        //     parallel {
-        //         stage('Scan Code with SonarQube') {
-        //             agent { label 'agent1' }
-        //             environment { SCANNER_HOME = tool 'sonar-scanner' }
-        //             steps {
-        //                 script {
-        //                     buildServices("Sonar Scan", { svc ->
-        //                         withSonarQubeEnv('sonar-server') {
-        //                             echo "Sonar Server scan ${svc}..."
-        //                             sh """
-        //                                 \$SCANNER_HOME/bin/sonar-scanner \\
-        //                                 -Dsonar.projectName="${svc}_Task_Management_Backend" \\
-        //                                 -Dsonar.projectKey="${svc}_taskmanagement_backend" \\
-        //                                 -Dsonar.sources=.
-        //                             """
-        //                         }
-        //                         // Đợi kết quả đánh giá chất lượng từ sonar
-        //                         waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
-        //                     }, 1)
-        //                 }
-        //             }
-        //         }
+        stage('Scan code') {
+            when {
+                expression { return env.TARGET_SERVICES }
+            }
+            parallel {
+                stage('Scan Code with SonarQube') {
+                    agent { label 'agent1' }
+                    environment { SCANNER_HOME = tool 'sonar-scanner' }
+                    steps {
+                        script {
+                            buildServices("Sonar Scan", { svc ->
+                                withSonarQubeEnv('sonar-server') {
+                                    echo "Sonar Server scan ${svc}..."
+                                    sh """
+                                        \$SCANNER_HOME/bin/sonar-scanner \\
+                                        -Dsonar.projectName="${svc}_Task_Management_Backend" \\
+                                        -Dsonar.projectKey="${svc}_taskmanagement_backend" \\
+                                        -Dsonar.sources=.
+                                    """
+                                }
+                                // Đợi kết quả đánh giá chất lượng từ sonar
+                                waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
+                            }, 1)
+                        }
+                    }
+                }
 
-        //         stage('Scan Code with Snyk') {
-        //              agent { label 'agent1' }
-        //              steps {
-        //                  script {
-        //                      withCredentials([
-        //                          string(credentialsId: 'snyk', variable: 'SNYK_TOKEN')
-        //                      ]) {
-        //                          buildServices("Snyk Scan", { svc ->
-        //                              echo "Snyk scan ${svc}..."
-        //                              sh """
-        //                                  snyk auth \$SNYK_TOKEN
-        //                                  snyk test . --all-projects \
-        //                                  --severity-threshold=medium \
-        //                                  --json > reports/snyk/snyk-report-${svc}.json || true
-        //                                  snyk monitor --all-projects
-        //                              """
-        //                          })
-        //                      }
-        //                  }
-        //              }
-        //          }
-        //     }
-        // }
+                stage('Scan Code with Snyk') {
+                     agent { label 'agent1' }
+                     steps {
+                         script {
+                             withCredentials([
+                                 string(credentialsId: 'snyk', variable: 'SNYK_TOKEN')
+                             ]) {
+                                 buildServices("Snyk Scan", { svc ->
+                                     echo "Snyk scan ${svc}..."
+                                     sh """
+                                         snyk auth \$SNYK_TOKEN
+                                         snyk test . --all-projects \
+                                         --severity-threshold=medium \
+                                         --json > reports/snyk/snyk-report-${svc}.json || true
+                                         snyk monitor --all-projects
+                                     """
+                                 })
+                             }
+                         }
+                     }
+                 }
+            }
+        }
         // Thực hiện build và đóng gói ứng dụng thành Docker image
         stage('Docker Build') {
             agent { label 'agent1' }
@@ -163,25 +163,25 @@ pipeline {
             }
         }
         // Đảm bảo image phải sạch bằng cách dùng trivy
-        // stage('Trivy Scan Image') {
-        //     agent { label 'agent1' }
-        //     when {
-        //         expression { return env.TARGET_SERVICES }
-        //     }
-        //     steps {
-        //         buildServices("Trivy Scan", { svc ->
-        //             echo "Bắt đầu quá trình scan Iamge ${svc}"
-        //             sh """
-        //                 mkdir -p reports/trivy
-        //                 trivy image --severity MEDIUM,HIGH,CRITICAL \
-        //                 --exit-code 1 \
-        //                 --format json \
-        //                 --output reports/trivy/trivy-report-${svc}.json \
-        //                 "${svc}" || true
-        //             """
-        //         })
-        //     }
-        // }
+        stage('Trivy Scan Image') {
+            agent { label 'agent1' }
+            when {
+                expression { return env.TARGET_SERVICES }
+            }
+            steps {
+                buildServices("Trivy Scan", { svc ->
+                    echo "Bắt đầu quá trình scan Iamge ${svc}"
+                    sh """
+                        mkdir -p reports/trivy
+                        trivy image --severity MEDIUM,HIGH,CRITICAL \
+                        --exit-code 1 \
+                        --format json \
+                        --output reports/trivy/trivy-report-${svc}.json \
+                        "${svc}" || true
+                    """
+                })
+            }
+        }
         // Đẩy repo image lên kho chứa Docker
         stage('Push Image to Docker Registry') {
             agent { label 'agent1' }
