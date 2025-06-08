@@ -44,7 +44,7 @@ pipeline {
         stage('Checkout from Git') {
             agent { label 'agent1' }
             steps {
-                //checkout scm
+                checkout scm
             }
         }
         // Kiểm tra từng dịch vụ xem có sự cập nhật hay không bằng cách so sánh khác biệt của base cũ và mới
@@ -124,7 +124,7 @@ pipeline {
                 }
 
                 stage('Scan Code with Snyk') {
-                    agent { label 'agent2' }
+                    agent { label 'agent1' }
                     steps {
                         script {
                             withCredentials([
@@ -157,7 +157,7 @@ pipeline {
                     buildServices("Build Image", { svc ->
                         echo("Bắt đầu quá trình build docker cho dịch vụ ${svc}...")
                         sh "docker build -t ${svc} ."
-                    })
+                    }, 1)
                 }
             }
         }
@@ -197,7 +197,7 @@ pipeline {
                             docker tag ${svc} ${image}
                             docker push ${image}
                         """
-                        })
+                        }, 1)
                     }
                 }
             }
@@ -211,7 +211,7 @@ pipeline {
                 emailext (
                     subject: "Pipeline ${buildStatus}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                     body: """
-                        <p>This is a Jenkins BINGO CICD pipeline status.</p>
+                        <p>This is Jenkins CICD pipeline status.</p>
                         <p>Project: ${env.JOB_NAME}</p>
                         <p>Build Number: ${env.BUILD_NUMBER}</p>
                         <p>Build Status: ${buildStatus}</p>
