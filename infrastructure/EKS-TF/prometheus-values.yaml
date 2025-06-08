@@ -20,12 +20,12 @@ grafana:
         - name: prometheus
           type: prometheus
           access: proxy
-          url: http://prometheus-prometheus-stack-kube-prom-prometheus.monitoring:9090
-          isDefault: true
+          url: http://prometheus-stack-kube-prom-prometheus.monitoring:9090
 
   ingress:
     enabled: true
     ingressClassName: alb
+    tls: false
     hosts:
       - grafana.netsena.io.vn
     path: /
@@ -49,25 +49,25 @@ grafana:
       - kubernetes.io/pvc-protection
   
 # -- Alertmanager 
-alertmanager:
-  enabled: true
-  service:
-    type: ClusterIP
-  ingress:
-    enabled: true
-    ingressClassName: alb
-    hosts:
-      - alertmanager.netsena.io.vn
-    paths:
-      - /*
-    annotations:
-      kubernetes.io/ingress.class: alb
-      alb.ingress.kubernetes.io/scheme: internet-facing
-      alb.ingress.kubernetes.io/target-type: ip
-      alb.ingress.kubernetes.io/backend-protocol: HTTP
-      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
-      alb.ingress.kubernetes.io/load-balancer-name: "alb-alertmanager"
-      alb.ingress.kubernetes.io/group.name: "alertmanager-alb-group"
+# alertmanager:
+#   enabled: true
+#   service:
+#     type: ClusterIP
+#   ingress:
+#     enabled: true
+#     ingressClassName: alb
+#     hosts:
+#       - alertmanager.netsena.io.vn
+#     paths:
+#       - /*
+#     annotations:
+#       kubernetes.io/ingress.class: alb
+#       alb.ingress.kubernetes.io/scheme: internet-facing
+#       alb.ingress.kubernetes.io/target-type: ip
+#       alb.ingress.kubernetes.io/backend-protocol: HTTP
+#       alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+#       alb.ingress.kubernetes.io/load-balancer-name: "alb-alertmanager"
+#       alb.ingress.kubernetes.io/group.name: "alertmanager-alb-group"
 
 # -- RBAC (tùy chọn, thường nên bật)
 rbacEnable: true
