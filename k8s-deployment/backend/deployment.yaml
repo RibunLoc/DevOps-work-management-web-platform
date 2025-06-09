@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: api-gateway-container
-          image: ribun/octaltask-backend-api-gateway:v1.0
+          image: ribun/task-management-api-gateway:v1.0
           ports:
             - containerPort: 3000
 
@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
         - name: auth-container
-          image: ribun/octaltask-backend-auth-service:v1.0
+          image: ribun/task-management-auth-service:v1.0
           ports:
             - containerPort: 50051
 
@@ -56,7 +56,28 @@ spec:
     spec:
       containers:
         - name: task-container
-          image: ribun/octaltask-backend-task-service:v1.0
+          image: ribun/task-management-task-service:v1.0
           ports:
             - containerPort: 50052
+          
 
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+        - name: task-container
+          image: ribun/task-management-user-service:v1.0
+          ports:
+            - containerPort: 50053

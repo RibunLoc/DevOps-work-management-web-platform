@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vault-test
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/RibunLoc/DevOps-work-management-web-platform.git
+    targetRevision: HEAD
+    path: test
+    plugin:
+      name: argocd-vault-plugin
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

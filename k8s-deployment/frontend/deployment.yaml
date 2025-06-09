@@ -19,7 +19,7 @@ spec:
         - name: frontend-container
           image: ribun/taskmanagement_frontend:v1.0
           ports:
-            - containerPort: 80
+            - containerPort: 5173
           env:
             - name: VITE_API_BASE
               valueFrom:
