@@ -12,14 +12,14 @@
 #       storage: 10Gi
 
 apiVersion: v1
-kind: PersistentVolumeClaim
+kind: PersistentVolume
 metadata:
-  name: mysql-pvc
-  namespace: mysql
+  name: mysql-pv
 spec:
+  capacity:
+    storage: 5Gi
   accessModes:
     - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
-  storageClassName: mysql-storage
+  hostPath:
+    path: "/mnt/data/mysql"
+  persistentVolumeReclaimPolicy: Retain
