@@ -49,7 +49,9 @@ yarn-error.log*
 
 # file yaml
 secret.yaml
-# argocd-vault-plugin-credentials.yaml
+argocd-vault-plugin-credentials.yaml
+
+
 # environment variables
 .env
 .env.*
