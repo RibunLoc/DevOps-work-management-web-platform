@@ -4,7 +4,7 @@ metadata:
   name: mysql-secret
   namespace: mysql
 data:
-  DB_USERNAME: <path:secret/dev/database#DB_USERNAME>
-  DB_PASSWORD: <path:secret/dev/database#DB_PASSWORD>
-  DB_DATABASE: <path:secret/dev/database#DB_DATABASE>
+  DB_USERNAME: <path:secret/data/dev/database#DB_USERNAME>
+  DB_PASSWORD: <path:secret/data/dev/database#DB_PASSWORD>
+  DB_DATABASE: <path:secret/data/dev/database#DB_DATABASE>
   
