@@ -26,24 +26,28 @@ spec:
         - name: tmp
           emptyDir: {}
       initContainers:
-        - name: download-tools
-          image: registry.access.redhat.com/ubi8
-          env:
-            - name: AVP_VERSION
-              value: "1.16.1"
-          command: [sh, -c]
-          args:
-            - >-
-              curl -L https://github.com/argoproj-labs/argocd-vault-plugin/releases/download/v$(AVP_VERSION)/argocd-vault-plugin_${AVP_VERSION}_linux_amd64 -o argocd-vault-plugin &&
-              chmod +x argocd-vault-plugin &&
-              mv argocd-vault-plugin /custom-tools/
-          volumeMounts:
-            - mountPath: /custom-tools
-              name: custom-tools
+      - name: download-tools
+        image: alpine:3.18
+        env:
+          - name: AVP_VERSION
+            value: "1.16.1"
+        command: [sh, -c]
+        args:
+          - >
+            apk update && apk add --no-cache curl &&
+            curl -L https://github.com/argoproj-labs/argocd-vault-plugin/releases/download/v${AVP_VERSION}/argocd-vault-plugin_${AVP_VERSION}_linux_amd64 -o argocd-vault-plugin &&
+            chmod +x argocd-vault-plugin &&
+            mv argocd-vault-plugin /custom-tools/
+        volumeMounts:
+          - mountPath: /custom-tools
+            name: custom-tools
       containers:
         - name: avp
           command: [/var/run/argocd/argocd-cmp-server]
           image: registry.access.redhat.com/ubi8
+          envFrom: 
+            - secretRef:
+                name: argocd-vault-plugin-credentials
           securityContext:
             runAsNonRoot: true
             runAsUser: 999

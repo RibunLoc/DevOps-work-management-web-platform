@@ -13,14 +13,8 @@ data:
       allowConcurrency: true
       discover:
         find:
-          command:
-            - sh
-            - "-c"
-            - "find . -name '*.yaml' | xargs -I {} grep \"<path\\|avp\\.kubernetes\\.io\" {} | grep ."
+          command: ["sh", "-c", "echo 'init step'"]
       generate:
-        command:
-          - argocd-vault-plugin
-          - generate
-          - "."
+        command: ["argocd-vault-plugin"]
+        args: ["generate", "./"]
       lockRepo: false
----

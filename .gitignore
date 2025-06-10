@@ -48,7 +48,6 @@ yarn-error.log*
 
 
 # file yaml
-configmap.yaml
 secret.yaml
 vault-credentials.yaml 
 
