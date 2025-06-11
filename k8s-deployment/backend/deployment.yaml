@@ -21,6 +21,23 @@ spec:
           envFrom:
             - configMapRef:
                 name: backend-config
+          resources:
+            requests: 
+              cpu: '100m'
+              memory: '128Mi'
+            limits:
+              cpu: '500m'
+              memory: '256Mi'
+          livenessProbe:
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe: 
+            tcpSocket:
+              port: 3000
+            initialDelaySconds: 5
+            periodSeconds: 10
 
 ---
 apiVersion: apps/v1
@@ -46,6 +63,23 @@ spec:
           envFrom:
             - configMapRef:
                 name: backend-config
+          resources:
+            requests: 
+              cpu: '100m'
+              memory: '128Mi'
+            limits:
+              cpu: '500m'
+              memory: '256Mi'
+          livenessProbe:
+            tcpSocket:
+              port: 50051
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe: 
+            tcpSocket:
+              port: 50051
+            initialDelaySeconds: 5
+            periodSeconds: 10
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -70,6 +104,23 @@ spec:
           envFrom:
             - configMapRef:
                 name: backend-config
+          resources:
+            requests: 
+              cpu: '100m'
+              memory: '128Mi'
+            limits:
+              cpu: '500m'
+              memory: '256Mi'
+          livenessProbe:
+            tcpSocket:
+              port: 50052
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe: 
+            tcpSocket:
+              port: 50052
+            initialDelaySeconds: 5
+            periodSeconds: 10
 
 ---
 apiVersion: apps/v1
@@ -95,3 +146,20 @@ spec:
           envFrom:
             - configMapRef:
                 name: backend-config
+          resources:
+            requests: 
+              cpu: '100m'
+              memory: '128Mi'
+            limits:
+              cpu: '500m'
+              memory: '256Mi'
+          livenessProbe:
+            tcpSocket:
+              port: 50053
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe: 
+            tcpSocket:
+              port: 50053
+            initialDelaySeconds: 5
+            periodSeconds: 10
