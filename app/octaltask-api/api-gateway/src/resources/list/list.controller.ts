@@ -9,7 +9,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody, ApiParam, ApiQuery, ApiB
 import { ListResponseDto, SharedListsResponseDto, SharedUsersResponseDto, ListMessageResponseDto, UsersSearchResponseDto, ListErrorResponseDto } from './dto/response.dto';
 
 @ApiTags('Lists')
-@ApiBearerAuth()
+@ApiBearerAuth('accessToken')
 @Controller('lists')
 export class ListController {
   constructor(private readonly listService: ListService) { }

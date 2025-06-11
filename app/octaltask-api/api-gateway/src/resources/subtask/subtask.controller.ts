@@ -6,7 +6,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBadRequestResponse, ApiNotFoundR
 import { SubtaskSubtaskResponseDto, SubtaskErrorResponseDto, DeleteResponseDto } from './dto/response.dto';
 
 @ApiTags('Subtasks')
-@ApiBearerAuth()
+@ApiBearerAuth('accessToken')
 @Controller('subtasks')
 export class SubtaskController {
   constructor(private readonly subtaskService: SubtaskService) { }
