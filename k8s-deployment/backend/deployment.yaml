@@ -17,6 +17,9 @@ spec:
           image: ribun/task-management-api-gateway:v1.0
           ports:
             - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: backend-config
 
 ---
 apiVersion: apps/v1
@@ -38,7 +41,9 @@ spec:
           image: ribun/task-management-auth-service:v1.0
           ports:
             - containerPort: 50051
-
+          envFrom:
+            - configMapRef:
+                name: backend-config
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -59,7 +64,9 @@ spec:
           image: ribun/task-management-task-service:v1.0
           ports:
             - containerPort: 50052
-          
+          envFrom:
+            - configMapRef:
+                name: backend-config
 
 ---
 apiVersion: apps/v1
@@ -81,3 +88,6 @@ spec:
           image: ribun/task-management-user-service:v1.0
           ports:
             - containerPort: 50053
+          envFrom:
+            - configMapRef:
+                name: backend-config
