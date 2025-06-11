@@ -4,13 +4,4 @@ metadata:
   name: longhorn
 provisioner: driver.longhorn.io
 allowVolumeExpansion: true
-reclaimPolicy: Retain
 volumeBindingMode: Immediate
-
-
-# apiVersion: storage.k8s.io/v1
-# kind: StorageClass
-# metadata:
-#   name: mysql-storage
-# provisioner: kubernetes.io/no-provisioner
-# volumeBindingMode: WaitForFirstConsumer
