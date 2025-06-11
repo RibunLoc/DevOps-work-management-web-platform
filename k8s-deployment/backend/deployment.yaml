@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: api-gateway-service
+  namespace: backend-dev
 spec:
   replicas: 1
   selector:
@@ -26,6 +27,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: auth-service
+  namespace: backend-dev
 spec:
   replicas: 1
   selector:
@@ -49,6 +51,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: task-service
+  namespace: backend-dev
 spec:
   replicas: 1
   selector:
@@ -73,6 +76,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: user-service
+  namespace: backend-dev
 spec:
   replicas: 1
   selector:

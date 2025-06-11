@@ -13,7 +13,7 @@ spec:
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
+    namespace: backend-dev
   syncPolicy:
     automated:
       prune: true

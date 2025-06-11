@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: backend-config
+  namespace: backend-dev
 data:
   MAIL_HOST: <path:secret/data/dev/backend#MAIL_HOST>
   MAIL_PORT: <path:secret/data/dev/backend#MAIL_PORT>
