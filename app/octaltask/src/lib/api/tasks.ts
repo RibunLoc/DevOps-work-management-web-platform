@@ -341,9 +341,10 @@ export const deleteCommentById = async (commentId: string) => {
 // Star/Unstar task
 export const toggleStarTask = async (taskId: string | number, isStarred: boolean) => {
   try {
+    const API_BASE = getApiBase();
     const token = Cookies.get('token');
     if (!token) throw new Error('No token found');
-
+    
     const res = await axios.patch(
       `${API_BASE}/tasks/${taskId}`,
       { isStarred },
@@ -363,6 +364,7 @@ export const toggleStarTask = async (taskId: string | number, isStarred: boolean
 // Complete/Uncomplete task
 export const toggleCompleteTask = async (taskId: string | number, isCompleted: boolean) => {
   try {
+    const API_BASE = getApiBase();
     const token = Cookies.get('token');
     if (!token) throw new Error('No token found');
 

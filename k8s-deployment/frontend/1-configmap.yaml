@@ -4,4 +4,7 @@ metadata:
   name: frontend-config
   namespace: frontend-dev
 data:
-  VITE_API_BASE: <path:secret/data/dev/app#VITE_API_BASE>
+  env.js: |
+    window.__ENV__ = {
+      VITE_API_BASE: "<path:secret/data/dev/app#VITE_API_BASE>"
+    };
