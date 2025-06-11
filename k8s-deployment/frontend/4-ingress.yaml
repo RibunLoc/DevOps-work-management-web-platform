@@ -10,7 +10,7 @@ metadata:
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/backend-protocol: HTTP
     alb.ingress.kubernetes.io/group.name: octaltask-app
-    alb.ingress.kubernetes.io/load-balancer-name: "alb-web-frontend"
+    alb.ingress.kubernetes.io/load-balancer-name: "alb-web"
 spec:
   ingressClassName: alb
   rules:

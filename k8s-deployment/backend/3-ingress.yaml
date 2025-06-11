@@ -10,7 +10,7 @@ metadata:
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
     alb.ingress.kubernetes.io/backend-protocol: HTTP
     alb.ingress.kubernetes.io/group.name: octaltask-app
-    alb.ingress.kubernetes.io/load-balancer-name: "alb-api-gateway"
+    alb.ingress.kubernetes.io/load-balancer-name: "alb-web"
 spec:
   ingressClassName: alb
   rules:
@@ -23,4 +23,4 @@ spec:
               service:
                 name: api-gateway-service
                 port:
-                  number: 80
+                  number: 3000
