@@ -172,4 +172,7 @@ next-env.d.ts
 # Local Netlify folder
 .netlify
 
+# Ca Certificate
+ca.crt
+
 
