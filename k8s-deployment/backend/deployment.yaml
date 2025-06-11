@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: api-gateway-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: api-gateway-service
@@ -27,7 +27,7 @@ kind: Deployment
 metadata:
   name: auth-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: auth-service
@@ -50,7 +50,7 @@ kind: Deployment
 metadata:
   name: task-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: task-service
@@ -74,7 +74,7 @@ kind: Deployment
 metadata:
   name: user-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: user-service
