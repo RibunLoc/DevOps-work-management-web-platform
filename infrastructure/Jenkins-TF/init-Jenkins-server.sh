@@ -99,14 +99,14 @@ sudo apt-get install helm -y
 
 # Ref - https://nodejs.org/en/download
 # Installing nvm && node
-apt update -y
-apt install -y curl
-curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
-apt install -y nodejs
+sudo apt-get update -y
+sudo apt-get install curl -y
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs
 
 # Ref - https://www.npmjs.com/package/snyk?activeTab=readme
 # Installing snyk
-npm install -g snyk
+sudo npm install -g snyk
 snyk --version
 
 

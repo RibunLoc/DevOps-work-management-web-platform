@@ -10,7 +10,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody, ApiParam, ApiCreatedResp
 import { TaskResponseDto, TaskCommentResponseDto, TaskSubtaskResponseDto, TaskErrorResponseDto } from './dto/response.dto';
 
 @ApiTags('Tasks')
-@ApiBearerAuth()
+@ApiBearerAuth('accessToken')
 @Controller('tasks')
 export class TaskController {
   constructor(private readonly taskService: TaskService) { }

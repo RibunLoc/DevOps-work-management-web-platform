@@ -21,8 +21,11 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
 
-    const { password, resetToken, resetTokenExpires, ...safeUser } = user;
-    return safeUser;
+    const { id, password, resetToken, resetTokenExpires, ...safeUser } = user;
+    return {
+      ...safeUser,
+      userId: id
+    }
   }
 
   async updateCurrentUser(userId: number, updateData: UpdateUserDto) {
@@ -45,8 +48,11 @@ export class UserService {
     if (updateData.name) user.name = updateData.name;
 
     const updatedUser = await this.userRepo.save(user);
-    const { password, resetToken, resetTokenExpires, ...safeUser } = updatedUser;
-    return safeUser;
+    const { id, password, resetToken, resetTokenExpires, ...safeUser } = updatedUser;
+    return {
+      ...safeUser,
+      userId: id
+    }
   }
 
   async changePassword(userId: number, changePasswordData: ChangePasswordDto) {
@@ -85,26 +91,32 @@ export class UserService {
 
     // Remove sensitive information from all users
     const safeUsers = users.map(user => {
-      const { password, resetToken, resetTokenExpires, ...safeUser } = user;
-      return safeUser;
+      const { id, password, resetToken, resetTokenExpires, ...safeUser } = user;
+      return {
+        ...safeUser,
+        userId: id
+      }
     });
 
     return safeUsers;
   }
 
-  async getUserById(id: number) {
-    const user = await this.userRepo.findOne({ where: { id } });
+  async getUserById(userId: number) {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    const { password, resetToken, resetTokenExpires, ...safeUser } = user;
-    return safeUser;
+    const { id, password, resetToken, resetTokenExpires, ...safeUser } = user;
+    return {
+      ...safeUser,
+      userId: id
+    }
   }
 
-  async updateUserById(id: number, updateData: AdminUpdateUserDto) {
-    const user = await this.userRepo.findOne({ where: { id } });
+  async updateUserById(userId: number, updateData: AdminUpdateUserDto) {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -124,8 +136,11 @@ export class UserService {
     if (updateData.role) user.role = updateData.role as any; // Cast to Role enum
 
     const updatedUser = await this.userRepo.save(user);
-    const { password, resetToken, resetTokenExpires, ...safeUser } = updatedUser;
-    return safeUser;
+    const { id, password, resetToken, resetTokenExpires, ...safeUser } = updatedUser;
+    return {
+      ...safeUser,
+      userId: id
+    }
   }
 
   async deleteUserById(id: number) {

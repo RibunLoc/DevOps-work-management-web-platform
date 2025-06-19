@@ -10,5 +10,5 @@ ingress:
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/backend-protocol: HTTP
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
-    alb.ingress.kubernetes.io/group.name: "longhorn-alb-group"
-    alb.ingress.kubernetes.io/load-balancer-name: "alb-longhorn"
+    alb.ingress.kubernetes.io/group.name: alb-ops-group
+    alb.ingress.kubernetes.io/load-balancer-name: alb-ops

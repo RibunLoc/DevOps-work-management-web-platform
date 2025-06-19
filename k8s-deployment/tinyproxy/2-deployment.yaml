@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tinyproxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tinyproxy
+  template:
+    metadata:
+      labels:
+        app: tinyproxy
+    spec:
+      containers:
+      - name: tinyproxy
+        image: vimagick/tinyproxy
+        ports:
+        - containerPort: 8888
+        env:
+        - name: TINYPROXY_PORT
+          value: "8888"
+        - name: TINYPROXY_LOGLEVEL
+          value: "Info"

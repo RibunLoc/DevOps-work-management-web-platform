@@ -48,8 +48,9 @@ yarn-error.log*
 
 
 # file yaml
-configmap.yaml
 secret.yaml
+argocd-vault-plugin-credentials.yaml
+
 
 # environment variables
 .env
@@ -170,5 +171,8 @@ next-env.d.ts
 
 # Local Netlify folder
 .netlify
+
+# Ca Certificate
+ca.crt
 
 

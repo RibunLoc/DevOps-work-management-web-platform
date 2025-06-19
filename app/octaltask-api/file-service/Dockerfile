@@ -15,12 +15,17 @@ RUN npm run build
 # Stage chạy ứng dụng
 FROM node:22-alpine
 
+# Tạo user không phải root
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
 WORKDIR /app
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 
+USER appuser
+
 EXPOSE 3000
-CMD ["npm", "run", "start"]
+CMD ["node", "dist/main.js"]
 

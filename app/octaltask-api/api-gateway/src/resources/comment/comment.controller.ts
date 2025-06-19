@@ -12,7 +12,7 @@ export class CommentController {
 
   @Get(':id')
   @UseGuards(JwtGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('accessToken')
   @ApiOperation({ summary: 'Get comment by ID', description: 'Retrieves a specific comment by its ID. User must be the comment author or admin.' })
   @ApiParam({ name: 'id', description: 'Comment ID', type: Number })
   @ApiOkResponse({ type: CommentCommentResponseDto, description: 'Comment found and returned' })
@@ -25,7 +25,7 @@ export class CommentController {
 
   @Patch(':id')
   @UseGuards(JwtGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('accessToken')
   @ApiOperation({ summary: 'Update comment', description: 'Updates the content of a comment. User must be the comment author.' })
   @ApiParam({ name: 'id', description: 'Comment ID', type: Number })
   @ApiBody({ type: UpdateCommentDto })
@@ -47,7 +47,7 @@ export class CommentController {
 
   @Delete(':id')
   @UseGuards(JwtGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('accessToken')
   @ApiOperation({ summary: 'Delete comment', description: 'Deletes a comment. User must be the comment author.' })
   @ApiParam({ name: 'id', description: 'Comment ID', type: Number })
   @ApiOkResponse({ type: DeleteCommentResponseDto, description: 'Comment successfully deleted' })

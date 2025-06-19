@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  namespace: frontend-dev
+data:
+  env.js: |
+    window.__ENV__ = {
+      VITE_API_BASE: "<path:secret/data/dev/app#VITE_API_BASE>"
+    };

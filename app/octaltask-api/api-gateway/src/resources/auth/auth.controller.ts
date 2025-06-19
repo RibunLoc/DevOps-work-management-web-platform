@@ -57,13 +57,13 @@ export class AuthController {
   @Get('me')
   @UseGuards(JwtGuard)
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
+  @ApiBearerAuth('accessToken')
   @ApiOperation({ summary: 'Get current user info', description: 'Get authenticated user information' })
   @ApiOkResponse({ type: AuthUserResponseDto, description: 'Current user information' })
   @ApiUnauthorizedResponse({ type: AuthErrorResponseDto, description: 'Unauthorized' })
   @ApiNotFoundResponse({ type: AuthErrorResponseDto, description: 'User not found' })
   async getMe(@Request() req: any) {
-    const userId = req.user.sub || req.user.id;
+    const userId = req.user.userId;
     return this.authService.getUserById(userId);
   }
 }

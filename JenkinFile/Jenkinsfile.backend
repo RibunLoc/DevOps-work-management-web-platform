@@ -1,15 +1,39 @@
+// tạo hàm duyệt từng service, cho phép giới hạn lần chạy
+def buildServices(noidung, lenhthucthi, limit = 0) {
+    def rawList = env.TARGET_SERVICES ?: ''
+    def services = rawList.split(',').collect { it.trim() }.findAll { it }
+
+    def buildTheoDot = { dot ->
+        def jobs = [:]
+        for (String svc in dot) {
+            jobs["${noidung} : ${svc}"] = {
+                dir("app/octaltask-api/${svc}/") {
+                    lenhthucthi(svc)
+                }
+            }
+        }
+        parallel jobs
+    }
+    // Nếu bằng 0 build song song (default)
+    if (limit <= 0) {
+        buildTheoDot(services)
+    } else {
+        // ngược lại build từng cái
+        services.each { svc ->
+            dir("app/octaltask-api/${svc}/") {
+                lenhthucthi(svc)
+            }
+        }
+    }
+}
+
 pipeline {
-    agent any
+    agent none
 
     // Cung cấp thông tin cần thiết cho pipeline
     parameters {
-        string(name: 'NAME_IMAGE', defaultValue: '', description: 'Tên thư mục service (ví dụ: auth-service)')
         string(name: 'TAG_NAME', defaultValue: 'v1.0', description: 'Tag image Docker')
         string(name: 'NAME_DOCKER', defaultValue: 'ribun', description: 'Docker username hoặc registry repo')
-    }
-    // Khai báo các biến môi trường cần thiết
-    environment {
-        SCANNER_HOME = tool 'sonar-scanner' // Đường dẫn đến SonarQube Scanner
     }
     // Khai báo các công cụ cần thiết cho pipeline
     tools {
@@ -18,50 +42,51 @@ pipeline {
     stages {
         // Kiểm tra mã nguồn
         stage('Checkout from Git') {
+            agent { label 'agent1' }
             steps {
                 checkout scm
             }
         }
-        // Thiết lập biến môi trường cần thiết cho quá trình build
-        stage('SET UP ENVIRONMENT') {
-            script {
-                REPO_IMAGE = "${params.NAME_DOCKER}/${params.NAME_IMAGE}:${params.TAG_NAME}"
-            }
-        }
-        // 
+        // Kiểm tra từng dịch vụ xem có sự cập nhật hay không bằng cách so sánh khác biệt của base cũ và mới
         stage('Detect Changed Folder') {
+            agent { label 'agent1' }
             steps {
                 script {
                     sh 'git fetch origin'
 
-                    def branch = env.BRANCH_NAME ?: 'develop'
-                    def base = sh(script: "git merge-base HEAD origin/${branch}", returnStdout: true).trim()
-                    def changes = sh(script: "git diff --name-only ${base}..HEAD", returnStdout: true).trim().split("\n")
+                    def changes = sh(
+                        script: "git diff --name-only HEAD~1 HEAD",
+                        returnStdout: true
+                    ).trim().split("\n")
 
                     def folders = ['api-gateway', 'auth-service', 'task-service', 'user-service', 'file-service']
-                    def target = folders.find { svc ->
-                        changes.any { it.startsWith("app/octaltask-api/${svc}/") }
+                    def changedServices = folders.findAll {
+                        svc -> changes.any { 
+                            it.startsWith("app/octaltask-api/${svc}/") 
+                        }
                     }
 
-                    if (!target) {
-                        echo "Không phát hiện service thay đổi. Kết thúc."
+                    if (changedServices.isEmpty()) {
+                        echo "Không phát hiện service nào thay đổi. Kết thúc pipeline"
                         currentBuild.result = 'SUCCESS'
                         return
                     }
 
-                    echo "➡️ Build service: ${target}"
-                    env.TARGET_SERVICE = target
+                    echo "Những dịch vụ cần build: ${changedServices.join(', ')}"
+                    env.TARGET_SERVICES = changedServices.join(',')
                 }
             }
         }
         // Cài đặt các dependencies cần thiết cho quá trình build
         stage('Install Dependencies') {
+            agent { label 'agent1' }
             when  {
-                expression { return env.TARGET_SERVICE }
+                expression { return env.TARGET_SERVICES }
             }
             steps {
-                dir("app/octaltask-api/${env.TARGET_SERVICE}") {
-                    script {
+                script {
+                    buildServices("Cài đặt thư viện cần thiết npm") { svc ->
+                        echo "Bắt đầu quá trình cài đặt thư viện..."
                         sh '''
                             npm install
                             npm run build
@@ -70,33 +95,135 @@ pipeline {
                 }
             }
         }
-        // Thực hiện build và đóng gói ứng dụng thành Docker image
-        stage('Docker Build') {
-            when  {
-                expression { return env.TARGET_SERVICE }
+        // Phân tích mã nguồn đảm bảo Security
+        stage('Scan code') {
+            when {
+                expression { return env.TARGET_SERVICES }
             }
-            steps{
-                dir("app/octaltask-api/${env.TARGET_SERVICE}") {
-                    script {
-                        sh "docker build -t ${params.NAME_IMAGE} ."
+            parallel {
+                stage('Scan Code with SonarQube') {
+                    agent { label 'agent1' }
+                    environment { SCANNER_HOME = tool 'sonar-scanner' }
+                    steps {
+                        script {
+                            buildServices("Sonar Scan", { svc ->
+                                withSonarQubeEnv('sonar-server') {
+                                    echo "Sonar Server scan ${svc}..."
+                                    sh '''
+                                        $SCANNER_HOME/bin/sonar-scanner \
+                                        -Dsonar.projectName="${svc}_Task_Management_Backend" \
+                                        -Dsonar.projectKey="${svc}_taskmanagement_backend" \
+                                        -Dsonar.sources=. || true
+                                    '''
+                                }
+                                // Đợi kết quả đánh giá chất lượng từ sonar
+                                waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
+                            }, 1)
+                        }
+                    }
+                }
+
+                stage('Scan Code with Snyk') {
+                    agent { label 'agent1' }
+                    steps {
+                        script {
+                            withCredentials([
+                                string(credentialsId: 'snyk', variable: 'SNYK_TOKEN')
+                            ]) {
+                                buildServices("Snyk Scan", { svc ->
+                                    echo "Snyk scan ${svc}..."
+                                    sh """
+                                        snyk auth \$SNYK_TOKEN
+                                        snyk test . --all-projects \
+                                        --severity-threshold=medium \
+                                        --json > reports/snyk/snyk-report-${svc}.json || true
+                                        snyk monitor --all-projects
+                                    """
+                                })
+                            }
+                        }
                     }
                 }
             }
         }
-        // Đẩy repo image lên kho chứa Docker
-        stage('Push Image to Docker Registry') {
-            when  {
-                expression { return env.TARGET_SERVICE }
+        // Thực hiện build và đóng gói ứng dụng thành Docker image
+        stage('Docker Build') {
+            agent { label 'agent1' }
+            when {
+                expression { return env.TARGET_SERVICES }
             }
             steps {
                 script {
+                    buildServices("Build Image", { svc ->
+                        echo("Bắt đầu quá trình build docker cho dịch vụ ${svc}...")
+                        sh "docker build -t ${svc} ."
+                    }, 1)
+                }
+            }
+        }
+        // Đảm bảo image phải sạch bằng cách dùng trivy
+        stage('Trivy Scan Image') {
+            agent { label 'agent1' }
+            when {
+                expression { return env.TARGET_SERVICES }
+            }
+            steps {
+                buildServices("Trivy Scan", { svc ->
+                    echo "Bắt đầu quá trình scan Iamge ${svc}"
+                    sh """
+                        mkdir -p reports/trivy
+                        trivy image --severity MEDIUM,HIGH,CRITICAL \
+                        --exit-code 1 \
+                        --format json \
+                        --output reports/trivy/trivy-report-${svc}.json \
+                        "${svc}" || true
+                    """
+                })
+            }
+        }
+        // Đẩy repo image lên kho chứa Docker
+        stage('Push Image to Docker Registry') {
+            agent { label 'agent1' }
+            when  {
+                expression { return env.TARGET_SERVICES }
+            }
+            steps {
+                script { 
                     withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
+                        buildServices("Đẩy Image lên repo ${params.NAME_DOCKER}", { svc ->
+                        def image = "${params.NAME_DOCKER}/task-management-${svc}:${params.TAG_NAME}"
+                        echo "Bắt đầu quá trình đẩy image..."
                         sh """
-                            docker tag ${params.NAME_IMAGE} ${REPO_IMAGE}
-                            docker push ${REPO_IMAGE}
+                            docker tag ${svc} ${image}
+                            docker push ${image}
                         """
+                        }, 1)
                     }
                 }
+            }
+        }
+    }
+    post {
+        always {
+            script {
+                def buildStatus = currentBuild.currentResult
+                def buildUser = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]?.userId ?: 'Github User'
+                emailext (
+                    subject: "Pipeline ${buildStatus}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    body: """
+                        <p>This is Jenkins CICD pipeline status.</p>
+                        <p>Project: ${env.JOB_NAME}</p>
+                        <p>Build Number: ${env.BUILD_NUMBER}</p>
+                        <p>Build Status: ${buildStatus}</p>
+                        <p>Started by: ${buildUser}</p>
+                        <p>Build URL: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
+                    """,
+                    to: 'hothanhloc12345@gmail.com',  
+                    from: 'hothanhloc12345@gmail.com', 
+                    replyTo: 'hothanhloc12345@gmail.com',
+                    mimeType: 'text/html',
+                    attachmentsPattern: 'reports/trivy/trivy-report-*.json, reports/snyk/snyk-report-*.json'
+                )
             }
         }
     }

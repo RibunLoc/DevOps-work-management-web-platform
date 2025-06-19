@@ -9,7 +9,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBadRequestResponse, ApiNotFoundR
 import { UserUserResponseDto, UsersListResponseDto, UserMessageResponseDto, UserErrorResponseDto } from './dto/response.dto';
 
 @ApiTags('Users')
-@ApiBearerAuth()
+@ApiBearerAuth('accessToken')
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) { }

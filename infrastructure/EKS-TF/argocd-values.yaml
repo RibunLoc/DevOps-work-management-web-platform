@@ -2,28 +2,35 @@
 server:
   service:
     type: ClusterIP
-  
+    ports:
+      http: 80
+    servicePortHttp: 80
+
   ingress:
     enabled: true
     ingressClassName: alb
+    servicePort: http
     annotations:
       kubernetes.io/ingress.class: alb
       alb.ingress.kubernetes.io/scheme: internet-facing
       alb.ingress.kubernetes.io/target-type: ip
       alb.ingress.kubernetes.io/backend-protocol: HTTP
-      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}, {"HTTPS":443}]'
-      alb.ingress.kubernetes.io/group.name: "argocd-alb-group"
-      alb.ingress.kubernetes.io/load-balancer-name: "alb-argocd"
-      alb.ingress.kubernetes.io/ssl-redirect: '443'
-    
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+      alb.ingress.kubernetes.io/group.name: alb-ops-group
+      alb.ingress.kubernetes.io/load-balancer-name: alb-ops
+      alb.ingress.kubernetes.io/healthcheck-path: "/auth/login"
+      alb.ingress.kubernetes.io/success-codes: "200,307"
+  
     hostname: "argocd.netsena.io.vn"
-    path: /*
+    path: /
     pathType: Prefix
     tls: false
 
 configs:
   secret:
     argocdServerAdminPassword: $2a$10$WB6tAqyvGrhooHauWJOfqeFaWdVekKwsasIAZwNj7mGc8frYgN67q
+  params:
+    server.insecure: true
 
 controller:
   enableStatefulSet: true
@@ -33,5 +40,3 @@ applicationSet:
 
 dex:
   enabled: false
-
-
