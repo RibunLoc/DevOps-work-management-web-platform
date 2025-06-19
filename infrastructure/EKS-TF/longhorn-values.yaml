@@ -3,7 +3,7 @@ ingress:
   enabled: true
   ingressClassName: alb
   host: longhorn.netsena.io.vn
-  path: /
+  path: /*
   annotations:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing

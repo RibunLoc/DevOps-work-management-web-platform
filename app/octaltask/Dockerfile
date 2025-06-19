@@ -14,8 +14,8 @@ USER appuser
 COPY --chown=appuser:appgroup package.json package-lock.json* ./
 RUN npm install
 
-# Copy source code (không cần chown lại nếu đã chown ở trên)
-COPY --chown=appuser:appgroup . .
+# Copy source code
+COPY . .
 RUN npm run build 
 
 EXPOSE 5173

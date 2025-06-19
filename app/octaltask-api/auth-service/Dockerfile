@@ -1,6 +1,5 @@
-# ---- Stage 1: Build ----
+# Stage 1: Build 
 FROM node:22-alpine AS builder
-
 
 # dir vào thư mục app để cài đặt dependencies
 WORKDIR /app
@@ -12,8 +11,11 @@ COPY . .
 RUN npm install
 RUN npm run build
 
-# Stage chạy ứng dụng
+# Stage 2: chạy ứng dụng
 FROM node:22-alpine
+
+# Tạo user không phải root
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 WORKDIR /app
 
@@ -21,5 +23,7 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 
+USER appuser
+
 EXPOSE 50051
-CMD ["npm", "run", "start"]
+CMD ["node", "dist/main.js"]
