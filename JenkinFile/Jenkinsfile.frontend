@@ -43,41 +43,41 @@ pipeline {
                 }
             }
         }
-        // Phân tích mã nguồn bằng SonarQube
-        stage('Scan Code with SonarQube') {
-            steps {
-                dir('app/octaltask') {
-                    script {
-                        withSonarQubeEnv('sonar-server') {
+        stage('Code Scan') {
+            parallel {
+                // Phân tích mã nguồn bằng SonarQube
+                stage('Scan Code SonarQube') {
+                    steps {
+                        dir('app/octaltask') {
                             script {
-                                sh """
-                                    ${SCANNER_HOME}/bin/sonar-scanner \
-                                    -Dsonar.projectName="TaskManagement_Frontend_Scan_Code" \
-                                    -Dsonar.projectKey="ribunloc_taskmanagement_frontend" \
-                                    -Dsonar.sources=.
-                                """
+                                withSonarQubeEnv('sonar-server') {
+                                    sh """
+                                        ${SCANNER_HOME}/bin/sonar-scanner \
+                                        -Dsonar.projectName="TaskManagement_Frontend_Scan_Code" \
+                                        -Dsonar.projectKey="ribunloc_taskmanagement_frontend" \
+                                        -Dsonar.sources=.
+                                    """
+                                }
                             }
                         }
                     }
                 }
-            }
-        }
-        // Dùng snyk để quét mã nguồn
-        stage('Snyk Scan Source Code') {
-            steps {
-                dir('app/octaltask') {
-                    script {
-                        withCredentials([
-                                string(credentialsId: 'snyk', variable: 'SNYK_TOKEN')
-                        ]) {
-                            sh '''
-                                mkdir -p reports/snyk
-                                snyk auth $SNYK_TOKEN
-                                snyk test . --all-projects \
-                                --severity-threshold=medium \
-                                --json > reports/snyk/snyk-report.json || true
-                                snyk monitor --all-projects
-                            '''
+                // Dùng snyk để quét mã nguồn
+                stage('Snyk Scan Source Code') {
+                    steps {
+                        dir('app/octaltask') {
+                            script {
+                                withCredentials([string(credentialsId: 'snyk', variable: 'SNYK_TOKEN')]) {
+                                    sh '''
+                                        mkdir -p reports/snyk
+                                        snyk auth $SNYK_TOKEN
+                                        snyk test . --all-projects \
+                                        --severity-threshold=medium \
+                                        --json > reports/snyk/snyk-report.json || true
+                                        snyk monitor --all-projects
+                                    '''
+                                }
+                            }
                         }
                     }
                 }
