@@ -14,7 +14,6 @@
 - **Trivy** - Scan lỗ hổng image & file cấu hình
 - **Jenkins** - CI/CD pipeline: build, test, deploy
 - **Prometheus && Grafana** - Giám sát & trực quan hóa hệ thống
-- **Calico** - Quản lý mạng pod, policy, mô phỏng tấn công
 ---
 
 ## Triển khai hạ tầng AWS bằng Terraform
