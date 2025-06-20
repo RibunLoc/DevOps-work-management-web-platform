@@ -202,7 +202,7 @@ pipeline {
                     echo "Thay tag cho image frontend -> ${imageName}"
 
                     sh """
-                        yq e '(.spec.template.spec.containers[] | select(.image | test("${image}")).image) = "${imageName}" -i ${yamlPath}'
+                        yq e '(.spec.template.spec.containers[] | select(.image == "'"\${image}"'").image) = "'"\${imageName}"'" -i ${yamlPath}'
                     """
 
                     //commit vào mã nguồn
@@ -244,8 +244,8 @@ pipeline {
                     body: """
                         <html>
                                 <body style="font-family: Arial, sans-serif; font-size: 14px;">
-                                    <h2 style="color: #0073e6;">Jenkins Pipeline Notification</h2>
-                                    <p><strong>Build summary:</strong></p>
+                                    <h2 style="color: #0073e6;">Jenkins Thông Báo Pipeline</h2>
+                                    <p><strong>Tóm tắt quá trình:</strong></p>
                                     <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse;">
                                         <tr>
                                             <td><strong>Dự án</strong></td>
@@ -257,7 +257,7 @@ pipeline {
                                         </tr>
                                         <tr>
                                             <td><strong>Trạng thái</strong></td>
-                                            <td style="color: ${buildStatus == 'SUCCESS' ? 'green' : 'red'};"><strong>${buildStatus}</strong></td>
+                                            <td style="color: ${trangThai == 'SUCCESS' ? 'green' : 'red'};"><strong>${trangThai}</strong></td>
                                         </tr>
                                         <tr>
                                             <td><strong>Được Trigger bởi</strong></td>
