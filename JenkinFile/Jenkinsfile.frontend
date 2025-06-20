@@ -202,6 +202,8 @@ pipeline {
                     echo "Thay tag cho image frontend -> ${imageName}"
 
                     sh """
+                        git checkout ${env.BRANCH_NAME} || git checkout -b ${env.BRANCH_NAME}
+                        git pull origin ${env.BRANCH_NAME} || true
                         yq e '(.spec.template.spec.containers[] | select(.image | test("${image}")).image) = "${imageName}"' -i ${yamlPath}
                     """
 
@@ -216,9 +218,6 @@ pipeline {
                             git config user.email = "hothanhloc12345@gmail.com"
                             git remote set-url origin https://${GIT_USER}:${GIT_TOKEN}@github.com/RibunLoc/DevOps-work-management-web-platform.git
                             
-                            git checkout ${env.BRANCH_NAME} || git checkout -b ${env.BRANCH_NAME}
-                            git pull origin ${env.BRANCH_NAME} || true
-
                             git add ${yamlPath}
                             git commit -m "ci: update new tag for ArgoCD - ${newTag}"
                             git push origin ${env.BRANCH_NAME}
