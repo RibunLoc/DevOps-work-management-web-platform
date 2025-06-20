@@ -215,13 +215,9 @@ pipeline {
                             git config user.name = "Jenkins server"
                             git config user.email = "hothanhloc12345@gmail.com"
                             git remote set-url origin https://${GIT_USER}:${GIT_TOKEN}@github.com/RibunLoc/DevOps-work-management-web-platform.git
-
-                            git checkout ${env.BRANCH_NAME}
-                            
+                            git pull --rebase origin ${env.BRANCH_NAME} || true
                             git add ${yamlPath}
                             git commit -m "ci: update new tag for ArgoCD - ${newTag}" || echo "Không có thay đổi"
-                            
-                            git pull --rebase origin ${env.BRANCH_NAME} || true
                             git push origin ${env.BRANCH_NAME}
                         """
                     }
