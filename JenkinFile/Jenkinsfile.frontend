@@ -180,8 +180,6 @@ pipeline {
                             passwordVariable: 'GIT_TOKEN'
                         )]) {
                             sh """
-                                cd gitOps
-
                                 yq e '(.spec.template.spec.containers[] | select(.image | test("${image}")).image) = "${env.REPO_IMAGE_TIME}"' -i ${yamlPath}
 
                                 git config user.name = "Jenkins server"
