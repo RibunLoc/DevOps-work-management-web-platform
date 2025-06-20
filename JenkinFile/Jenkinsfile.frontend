@@ -202,7 +202,7 @@ pipeline {
                     echo "Thay tag cho image frontend -> ${imageName}"
 
                     sh """
-                        yq e '(.spec.template.spec.containers[] | select(.image == "'"\${image}"'").image) = "'"\${imageName}"'" -i ${yamlPath}'
+                        yq e '(.spec.template.spec.containers[] | select(.image | test("${imageName}")).image) = "${image}"' -i ${yamlPath}
                     """
 
                     //commit vào mã nguồn
