@@ -197,13 +197,13 @@ pipeline {
 
                     echo "Cập nhật file YAML ${yamlPath} với tag: ${newTag}"
 
-                    def image = "${params.NAME_DOCKER}/${params.NAME_IMAGE}:${newTag}"
-                    echo "Thay tag cho image frontend -> ${image}"
+                    def imageName = "${params.NAME_DOCKER}/${params.NAME_IMAGE}:${newTag}"
+                    echo "Thay tag cho image frontend -> ${imageName}"
 
                     sh """
                         yq e '(.spec.template.spec.containers[] | 
                         select(.image | test("${imageName}")).image)
-                        = "${image}" -i ${yamlPath}'
+                        = "${imageName}" -i ${yamlPath}'
                     """
 
                     //commit vào mã nguồn
