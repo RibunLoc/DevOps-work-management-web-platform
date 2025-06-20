@@ -29,7 +29,7 @@ def buildServices(noidung, lenhthucthi, limit = 0) {
 
 pipeline {
     agent none
-
+    def SKIP_NOTIFY = false // không cho phép bất chấp báo email
     // Cung cấp thông tin cần thiết cho pipeline
     parameters {
         string(name: 'TAG_NAME', defaultValue: 'v1.0', description: 'Tag image Docker')
@@ -52,10 +52,10 @@ pipeline {
             agent { label 'agent1' }
             steps {
                 script {
-                    sh 'git fetch origin'
+                    sh "git fetch origin ${env.BRANCH_NAME}"
 
                     def changes = sh(
-                        script: "git diff --name-only HEAD~1 HEAD",
+                        script: "git diff --name-only origin/${env.BRANCH_NAME} HEAD",
                         returnStdout: true
                     ).trim().split("\n")
 
@@ -69,6 +69,7 @@ pipeline {
                     if (changedServices.isEmpty()) {
                         echo "Không phát hiện service nào thay đổi. Kết thúc pipeline"
                         currentBuild.result = 'SUCCESS'
+                        SKIP_NOTIFY = true
                         return
                     }
 
@@ -130,14 +131,16 @@ pipeline {
                             withCredentials([
                                 string(credentialsId: 'snyk', variable: 'SNYK_TOKEN')
                             ]) {
+                                // tạo thư mục lưu trữ báo cáo
+                                sh('mkdir -p reports/snyk')
                                 buildServices("Snyk Scan", { svc ->
                                     echo "Snyk scan ${svc}..."
                                     sh """
                                         snyk auth \$SNYK_TOKEN
-                                        snyk test . --all-projects \
+                                        snyk test --file=package.json \
                                         --severity-threshold=medium \
                                         --json > reports/snyk/snyk-report-${svc}.json || true
-                                        snyk monitor --all-projects
+                                        snyk monitor --file=package.json || true
                                     """
                                 })
                             }
@@ -161,7 +164,7 @@ pipeline {
                 }
             }
         }
-        // Đảm bảo image phải sạch bằng cách dùng trivy
+        // Đảm bảo image phải sạch bằng cách dùng trivy tri
         stage('Trivy Scan Image') {
             agent { label 'agent1' }
             when {
@@ -202,25 +205,92 @@ pipeline {
                 }
             }
         }
+        // Update file yaml để argoCD fetch
+        stage('Update file Yaml to ArgoCD Sync') {
+            agent {label 'agent1' }
+            when {
+                expression { return env.TARGET_SERVICES }
+            }
+            steps {
+                script {
+                    def getTime = new Date().format("yyyMMdd-HHmmss")
+                    def newTag  = "${params.TAG_NAME}-${getTime}"
+                    def yamlPath = "k8s-deployment/backend/1-deployment.yaml"
+
+                    echo "Cập nhật file YAML ${yamlPath} với tag: ${newTag}"
+
+                    buildServices("Update image tag", { svc -> 
+                        def image = "${params.NAME_DOCKER}/task-management-${svc}:${newTag}"
+                        echo "Thay tag cho service ${svc} -> ${image}"
+
+                        sh """
+                            yq e '(.spec.template.spec.containers[] | 
+                            select(.image | test("${imageName}")).image)
+                            = "${image}" -i ${yamlPath}'
+                        """
+                    }, 1)
+
+                    //commit vào mã nguồn
+                    sh """
+                        git config user.name = "Jenkins server"
+                        git config user.email = "hothanhloc12345@gmail.com"
+                        git add ${yamlPath}
+                        git commit -m "ci: update new tag for ArgoCD - ${newTag}" || echo "Không có thay đổi"
+                        git push origin ${env.BRANCH_NAME}
+                    """
+                }
+            }
+        }
     }
     post {
         always {
             script {
-                def buildStatus = currentBuild.currentResult
-                def buildUser = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]?.userId ?: 'Github User'
+                if (SKIP_NOTIFY) {
+                    echo "Bỏ qua email vì không có thay đổi!"
+                    return
+                }
+                // báo email về hothanhloc12345@gmail.com
+                def trangThai = currentBuild.currentResult
+                def nguoiBuild = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]?.userId ?: 'Github User'
                 emailext (
-                    subject: "Pipeline ${buildStatus}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    subject: "[Jenkins] Pipeline ${trangThai}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                     body: """
-                        <p>This is Jenkins CICD pipeline status.</p>
-                        <p>Project: ${env.JOB_NAME}</p>
-                        <p>Build Number: ${env.BUILD_NUMBER}</p>
-                        <p>Build Status: ${buildStatus}</p>
-                        <p>Started by: ${buildUser}</p>
-                        <p>Build URL: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
+                        <html>
+                                <body style="font-family: Arial, sans-serif; font-size: 14px;">
+                                    <h2 style="color: #0073e6;">Jenkins Pipeline Notification</h2>
+                                    <p><strong>Build summary:</strong></p>
+                                    <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse;">
+                                        <tr>
+                                            <td><strong>Dự án</strong></td>
+                                            <td>${env.JOB_NAME}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Thứ tự Build</strong></td>
+                                            <td>#${env.BUILD_NUMBER}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Trạng thái</strong></td>
+                                            <td style="color: ${buildStatus == 'SUCCESS' ? 'green' : 'red'};"><strong>${buildStatus}</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Được Trigger bởi</strong></td>
+                                            <td>${nguoiBuild}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Xem chi tiết tại đây</strong></td>
+                                            <td><a href="${env.BUILD_URL}">${env.BUILD_URL}</a></td>
+                                        </tr>
+                                    </table>
+
+                                    <p style="margin-top: 20px;">Reports attached (if available): Trivy, Snyk</p>
+
+                                    <p style="font-size: 12px; color: #999;">Jenkins DevOps Notification System</p>
+                                </body>
+                        </html>
                     """,
-                    to: 'hothanhloc12345@gmail.com',  
-                    from: 'hothanhloc12345@gmail.com', 
-                    replyTo: 'hothanhloc12345@gmail.com',
+                    to: 'hothanhloc12345@gmail.com',
+                    from: 'hothanhloc12345@gmail.com',
+                    replyTo: '22520787@gm.uit.edu.vn',
                     mimeType: 'text/html',
                     attachmentsPattern: 'reports/trivy/trivy-report-*.json, reports/snyk/snyk-report-*.json'
                 )
