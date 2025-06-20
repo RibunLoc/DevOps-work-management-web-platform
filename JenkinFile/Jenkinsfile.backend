@@ -29,11 +29,14 @@ def buildServices(noidung, lenhthucthi, limit = 0) {
 
 pipeline {
     agent none
-    def SKIP_NOTIFY = false // không cho phép bất chấp báo email
     // Cung cấp thông tin cần thiết cho pipeline
     parameters {
         string(name: 'TAG_NAME', defaultValue: 'v1.0', description: 'Tag image Docker')
         string(name: 'NAME_DOCKER', defaultValue: 'ribun', description: 'Docker username hoặc registry repo')
+    }
+    // Khai báo các biến môi trường cần thiết
+    environment {
+        SKIP_NOTIFY = 'false' // không cho phép bất chấp báo email
     }
     // Khai báo các công cụ cần thiết cho pipeline
     tools {
@@ -69,7 +72,7 @@ pipeline {
                     if (changedServices.isEmpty()) {
                         echo "Không phát hiện service nào thay đổi. Kết thúc pipeline"
                         currentBuild.result = 'SUCCESS'
-                        SKIP_NOTIFY = true
+                        SKIP_NOTIFY = 'true'
                         return
                     }
 
@@ -245,7 +248,7 @@ pipeline {
     post {
         always {
             script {
-                if (SKIP_NOTIFY) {
+                if (SKIP_NOTIFY == 'true') {
                     echo "Bỏ qua email vì không có thay đổi!"
                     return
                 }

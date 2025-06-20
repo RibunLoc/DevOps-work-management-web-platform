@@ -1,6 +1,5 @@
 pipeline {
     agent any
-    def SKIP_NOTIFY = false // không cho phép bất chấp báo email
     // Cung cấp thông tin cân thiết cho pipeline
     parameters {
         string(name: 'TAG_NAME', defaultValue: 'v2.0', description: 'Đây là tag mà bạn muốn gán chi image Docker')
@@ -10,6 +9,7 @@ pipeline {
     // Khai báo các biến môi trường cần thiết
     environment {
         SCANNER_HOME = tool 'sonar-scanner' // Đường dẫn đến SonarQube Scanner
+        SKIP_NOTIFY = 'false' // không cho phép bất chấp báo email
     }
     // Khai báo các công cụ cần thiết cho pipeline
     tools {
@@ -19,7 +19,7 @@ pipeline {
         // Kiểm tra mã nguồn
         stage('Checkout from Git') {
             steps {
-                git branch: 'develop', url: 'https://github.com/RibunLoc/DevOps-work-management-web-platform.git'
+                checkout scm
             }
         }
         //Kiểm tra sự thay đổi của thư mục frontend
@@ -40,7 +40,7 @@ pipeline {
                         // không làm gì cả và kết thúc pipeline
                         echo "Không có file cập nhật được push, Kết thúc Pipeliine"
                         currentBuild.result = 'SUCCESS'
-                        SKIP_NOTIFY = true
+                        env.SKIP_NOTIFY = 'true'
                         return
                     }
 
@@ -222,7 +222,7 @@ pipeline {
         always {
             archiveArtifacts artifacts: 'reports/**', fingerprint: true
 
-           if (SKIP_NOTIFY) {
+           if (env.SKIP_NOTIFY == 'true') {
                 echo "Bỏ qua email vì không có thay đổi!"
                 return
             }
