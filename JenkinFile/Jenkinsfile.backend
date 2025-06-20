@@ -161,7 +161,7 @@ pipeline {
                 }
             }
         }
-        // Đảm bảo image phải sạch bằng cách dùng trivy
+        // Đảm bảo image phải sạch bằng cách dùng trivy tri
         stage('Trivy Scan Image') {
             agent { label 'agent1' }
             when {
