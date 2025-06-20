@@ -161,7 +161,7 @@ pipeline {
                     checkout([$class: 'GitSCM',
                         branches: [[name: "*/${env.BRANCH_NAME}"]],
                         userRemoteConfigs: [[
-                            url: 'https://github.com/RibunLoc/DevOps-task-management-gitops.git'
+                            url: 'https://github.com/RibunLoc/DevOps-task-management-gitops.git',
                             credentialsId: 'github-token'
                         ]]
                     ])
