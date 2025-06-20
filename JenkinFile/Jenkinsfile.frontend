@@ -187,7 +187,7 @@ pipeline {
                                 git remote set-url origin https://${GIT_USER}:${GIT_TOKEN}@github.com/RibunLoc/DevOps-task-management-gitops.git
 
                                 git add ${yamlPath}
-                                git commit -m "ci: update new tag for ArgoCD - ${newTag}" || echo "Không có thay đổi"
+                                git commit -m "ci: update new tag for ArgoCD - ${env.NEW_TAG}" || echo "Không có thay đổi"
                                 git pull --rebase origin ${env.BRANCH_NAME} || true
                                 git push origin ${env.BRANCH_NAME}
                             """
