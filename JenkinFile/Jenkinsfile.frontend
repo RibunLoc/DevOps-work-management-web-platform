@@ -221,56 +221,57 @@ pipeline {
     post {
         always {
             archiveArtifacts artifacts: 'reports/**', fingerprint: true
+            script {
+                if (env.SKIP_NOTIFY == 'true') {
+                    echo "Bỏ qua email vì không có thay đổi!"
+                    return
+                }
+                // báo email về hothanhloc12345@gmail.com
+                def trangThai = currentBuild.currentResult
+                def nguoiBuild = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]?.userId ?: 'Github User'
+                emailext (
+                    subject: "[Jenkins] Pipeline ${trangThai}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    body: """
+                        <html>
+                                <body style="font-family: Arial, sans-serif; font-size: 14px;">
+                                    <h2 style="color: #0073e6;">Jenkins Pipeline Notification</h2>
+                                    <p><strong>Build summary:</strong></p>
+                                    <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse;">
+                                        <tr>
+                                            <td><strong>Dự án</strong></td>
+                                            <td>${env.JOB_NAME}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Thứ tự Build</strong></td>
+                                            <td>#${env.BUILD_NUMBER}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Trạng thái</strong></td>
+                                            <td style="color: ${buildStatus == 'SUCCESS' ? 'green' : 'red'};"><strong>${buildStatus}</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Được Trigger bởi</strong></td>
+                                            <td>${nguoiBuild}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Xem chi tiết tại đây</strong></td>
+                                            <td><a href="${env.BUILD_URL}">${env.BUILD_URL}</a></td>
+                                        </tr>
+                                    </table>
 
-           if (env.SKIP_NOTIFY == 'true') {
-                echo "Bỏ qua email vì không có thay đổi!"
-                return
+                                    <p style="margin-top: 20px;">Reports attached (if available): Trivy, Snyk</p>
+
+                                    <p style="font-size: 12px; color: #999;">Jenkins DevOps Notification System</p>
+                                </body>
+                        </html>
+                    """,
+                    to: 'hothanhloc12345@gmail.com',
+                    from: 'hothanhloc12345@gmail.com',
+                    replyTo: '22520787@gm.uit.edu.vn',
+                    mimeType: 'text/html',
+                    attachmentsPattern: 'reports/trivy/trivy-report-*.json, reports/snyk/snyk-report-*.json'
+                )
             }
-            // báo email về hothanhloc12345@gmail.com
-            def trangThai = currentBuild.currentResult
-            def nguoiBuild = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]?.userId ?: 'Github User'
-            emailext (
-                subject: "[Jenkins] Pipeline ${trangThai}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: """
-                    <html>
-                            <body style="font-family: Arial, sans-serif; font-size: 14px;">
-                                <h2 style="color: #0073e6;">Jenkins Pipeline Notification</h2>
-                                <p><strong>Build summary:</strong></p>
-                                <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse;">
-                                    <tr>
-                                        <td><strong>Dự án</strong></td>
-                                        <td>${env.JOB_NAME}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Thứ tự Build</strong></td>
-                                        <td>#${env.BUILD_NUMBER}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Trạng thái</strong></td>
-                                        <td style="color: ${buildStatus == 'SUCCESS' ? 'green' : 'red'};"><strong>${buildStatus}</strong></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Được Trigger bởi</strong></td>
-                                        <td>${nguoiBuild}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Xem chi tiết tại đây</strong></td>
-                                        <td><a href="${env.BUILD_URL}">${env.BUILD_URL}</a></td>
-                                    </tr>
-                                </table>
-
-                                <p style="margin-top: 20px;">Reports attached (if available): Trivy, Snyk</p>
-
-                                <p style="font-size: 12px; color: #999;">Jenkins DevOps Notification System</p>
-                            </body>
-                    </html>
-                """,
-                to: 'hothanhloc12345@gmail.com',
-                from: 'hothanhloc12345@gmail.com',
-                replyTo: '22520787@gm.uit.edu.vn',
-                mimeType: 'text/html',
-                attachmentsPattern: 'reports/trivy/trivy-report-*.json, reports/snyk/snyk-report-*.json'
-            )
         }
         success {
             echo 'Deployment successful!'
