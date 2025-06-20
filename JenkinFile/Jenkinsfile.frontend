@@ -146,8 +146,8 @@ pipeline {
                         sh """
                             docker tag ${params.NAME_IMAGE} ${env.REPO_IMAGE_TIME}
                             docker push ${env.REPO_IMAGE_TIME}
-                            docker rmi ${params.NAME_IMAGE}
-                            docker rmi ${env.REPO_IMAGE_TIME}
+                            docker rmi ${params.NAME_IMAGE} || true
+                            docker rmi ${env.REPO_IMAGE_TIME} || true
                         """
                     }
                 }
