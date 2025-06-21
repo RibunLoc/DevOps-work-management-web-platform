@@ -9,6 +9,7 @@ pipeline {
     // Khai báo các biến môi trường cần thiết
     environment {
         SCANNER_HOME = tool 'sonar-scanner' // Đường dẫn đến SonarQube Scanner
+        SKIP_NOTIFY = 'false' // không cho phép bất chấp báo email
     }
     // Khai báo các công cụ cần thiết cho pipeline
     tools {
@@ -39,7 +40,8 @@ pipeline {
                         // không làm gì cả và kết thúc pipeline
                         echo "Không có file cập nhật được push, Kết thúc Pipeliine"
                         currentBuild.result = 'SUCCESS'
-                        error("Không có file cập nhật được push, Kết thúc Pipeliine")
+                        env.SKIP_NOTIFY = 'true'
+                        return
                     }
 
                     echo "Phát hiện sự thay đổi trong thư mục app/octaltask(frontend)"
@@ -49,6 +51,9 @@ pipeline {
         }
         // Thiết lập biến môi trường cần thiết cho quá trình build
         stage('SET UP ENVIRONMENT') {
+            when  {
+                expression { return env.SKIP_NOTIFY != 'true' }
+            }
             steps {
                 script {
                     def getTime = new Date().format("yyyyMMdd-HHmmss")
@@ -60,6 +65,9 @@ pipeline {
         }
         // Cài đặt các dependecies cần thiết cho quá trình build
         stage('Install Dependencies') {
+            when  {
+                expression { return env.SKIP_NOTIFY != 'true' }
+            }
             steps {
                 dir('app/octaltask') {
                     script{
@@ -72,6 +80,9 @@ pipeline {
             }
         }
         stage('Code Scan') {
+            when  {
+                expression { return env.SKIP_NOTIFY != 'true' }
+            }
             parallel {
                 // Phân tích mã nguồn bằng SonarQube
                 stage('Scan Code SonarQube') {
@@ -113,6 +124,9 @@ pipeline {
         }
         // Thực hiện build và đóng gói ứng dụng thành Docker image
         stage('Docker Build') {
+            when  {
+                expression { return env.SKIP_NOTIFY != 'true' }
+            }
             steps{
                 dir('app/octaltask') {
                     script {
@@ -123,6 +137,9 @@ pipeline {
         }
         // Dùng trivy scan image để quét lỗ hỗng bảo mật trong container
         stage('Trivy Scan Image') {
+            when  {
+                expression { return env.SKIP_NOTIFY != 'true' }
+            }
             steps {
                 script {
                     sh """
@@ -138,6 +155,9 @@ pipeline {
         }
         // Đẩy repo image lên kho chứa Docker
         stage('Push Image to Docker Registry') {
+            when  {
+                expression { return env.SKIP_NOTIFY != 'true' }
+            }
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
@@ -153,6 +173,9 @@ pipeline {
         }
         // Update file yaml để argoCD fetch
         stage('Update file Yaml to ArgoCD Sync') {
+             when  {
+                expression { return env.SKIP_NOTIFY != 'true' }
+            }
             steps {
                 // clone repo gitops riêng
                 dir('gitOps') {
@@ -200,6 +223,10 @@ pipeline {
         always {
             archiveArtifacts artifacts: 'reports/**', fingerprint: true
             script {
+                if (env.SKIP_NOTIFY == 'true') {
+                    echo "Bỏ qua email vì không có thay đổi!"
+                    return
+                }
                 // báo email về hothanhloc12345@gmail.com
                 def trangThai = currentBuild.currentResult
                 def nguoiBuild = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]?.userId ?: 'Github'
