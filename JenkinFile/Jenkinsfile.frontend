@@ -9,7 +9,6 @@ pipeline {
     // Khai báo các biến môi trường cần thiết
     environment {
         SCANNER_HOME = tool 'sonar-scanner' // Đường dẫn đến SonarQube Scanner
-        SKIP_NOTIFY = 'false' // không cho phép bất chấp báo email
     }
     // Khai báo các công cụ cần thiết cho pipeline
     tools {
@@ -40,8 +39,7 @@ pipeline {
                         // không làm gì cả và kết thúc pipeline
                         echo "Không có file cập nhật được push, Kết thúc Pipeliine"
                         currentBuild.result = 'SUCCESS'
-                        env.SKIP_NOTIFY = 'true'
-                        return
+                        error("Không có file cập nhật được push, Kết thúc Pipeliine")
                     }
 
                     echo "Phát hiện sự thay đổi trong thư mục app/octaltask(frontend)"
@@ -202,10 +200,6 @@ pipeline {
         always {
             archiveArtifacts artifacts: 'reports/**', fingerprint: true
             script {
-                if (env.SKIP_NOTIFY == 'true') {
-                    echo "Bỏ qua email vì không có thay đổi!"
-                    return
-                }
                 // báo email về hothanhloc12345@gmail.com
                 def trangThai = currentBuild.currentResult
                 def nguoiBuild = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]?.userId ?: 'Github'
