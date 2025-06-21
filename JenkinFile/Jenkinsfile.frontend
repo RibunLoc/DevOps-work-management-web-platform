@@ -9,7 +9,8 @@ pipeline {
     // Khai báo các biến môi trường cần thiết
     environment {
         SCANNER_HOME = tool 'sonar-scanner' // Đường dẫn đến SonarQube Scanner
-        SKIP_NOTIFY = 'false' // không cho phép bất chấp báo email
+        SKIP_PIPELINE = 'false' 
+        SKIP_NOTIFY   = 'false' // không cho phép bất chấp báo email
     }
     // Khai báo các công cụ cần thiết cho pipeline
     tools {
@@ -39,8 +40,9 @@ pipeline {
                     if (!changedFolder) {
                         // không làm gì cả và kết thúc pipeline
                         echo "Không có file cập nhật được push, Kết thúc Pipeliine"
-                        currentBuild.result = 'SUCCESS'
-                        env.SKIP_NOTIFY = 'true'
+                        currentBuild.result = 'NOT_BUILT'
+                        env.SKIP_PIPELINE = 'true'
+                        env.SKIP_NOTIFY   = 'true'
                         return
                     }
 
@@ -52,7 +54,7 @@ pipeline {
         // Thiết lập biến môi trường cần thiết cho quá trình build
         stage('SET UP ENVIRONMENT') {
             when  {
-                expression { return env.SKIP_NOTIFY != 'true' }
+                expression { return env.SKIP_PIPELINE != 'true' }
             }
             steps {
                 script {
@@ -66,7 +68,7 @@ pipeline {
         // Cài đặt các dependecies cần thiết cho quá trình build
         stage('Install Dependencies') {
             when  {
-                expression { return env.SKIP_NOTIFY != 'true' }
+                expression { return env.SKIP_PIPELINE != 'true' }
             }
             steps {
                 dir('app/octaltask') {
@@ -81,7 +83,7 @@ pipeline {
         }
         stage('Code Scan') {
             when  {
-                expression { return env.SKIP_NOTIFY != 'true' }
+                expression { return env.SKIP_PIPELINE != 'true' }
             }
             parallel {
                 // Phân tích mã nguồn bằng SonarQube
@@ -125,7 +127,7 @@ pipeline {
         // Thực hiện build và đóng gói ứng dụng thành Docker image
         stage('Docker Build') {
             when  {
-                expression { return env.SKIP_NOTIFY != 'true' }
+                expression { return env.SKIP_PIPELINE != 'true' }
             }
             steps{
                 dir('app/octaltask') {
@@ -138,7 +140,7 @@ pipeline {
         // Dùng trivy scan image để quét lỗ hỗng bảo mật trong container
         stage('Trivy Scan Image') {
             when  {
-                expression { return env.SKIP_NOTIFY != 'true' }
+                expression { return env.SKIP_PIPELINE != 'true' }
             }
             steps {
                 script {
@@ -156,7 +158,7 @@ pipeline {
         // Đẩy repo image lên kho chứa Docker
         stage('Push Image to Docker Registry') {
             when  {
-                expression { return env.SKIP_NOTIFY != 'true' }
+                expression { return env.SKIP_PIPELINE != 'true' }
             }
             steps {
                 script {
@@ -174,7 +176,7 @@ pipeline {
         // Update file yaml để argoCD fetch
         stage('Update file Yaml to ArgoCD Sync') {
              when  {
-                expression { return env.SKIP_NOTIFY != 'true' }
+                expression { return env.SKIP_PIPELINE != 'true' }
             }
             steps {
                 // clone repo gitops riêng
