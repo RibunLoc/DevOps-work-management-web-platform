@@ -9,7 +9,6 @@ pipeline {
     // Khai báo các biến môi trường cần thiết
     environment {
         SCANNER_HOME = tool 'sonar-scanner' // Đường dẫn đến SonarQube Scanner
-        SKIP_PIPELINE = 'false' 
         SKIP_NOTIFY   = 'false' // không cho phép bất chấp báo email
     }
     // Khai báo các công cụ cần thiết cho pipeline
@@ -40,9 +39,11 @@ pipeline {
                     if (!changedFolder) {
                         // không làm gì cả và kết thúc pipeline
                         echo "Không có file cập nhật được push, Kết thúc Pipeliine"
-                        currentBuild.result = 'NOT_BUILT'
-                        env.SKIP_PIPELINE = 'true'
+                        currentBuild.result = 'SUCCESS'
                         env.SKIP_NOTIFY   = 'true'
+                        catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
+                            error("Skip pipeline do không có thay đổi")
+                        }
                         return
                     }
 
@@ -53,9 +54,6 @@ pipeline {
         }
         // Thiết lập biến môi trường cần thiết cho quá trình build
         stage('SET UP ENVIRONMENT') {
-            when  {
-                expression { return env.SKIP_PIPELINE != 'true' }
-            }
             steps {
                 script {
                     def getTime = new Date().format("yyyyMMdd-HHmmss")
@@ -67,9 +65,6 @@ pipeline {
         }
         // Cài đặt các dependecies cần thiết cho quá trình build
         stage('Install Dependencies') {
-            when  {
-                expression { return env.SKIP_PIPELINE != 'true' }
-            }
             steps {
                 dir('app/octaltask') {
                     script{
@@ -82,9 +77,6 @@ pipeline {
             }
         }
         stage('Code Scan') {
-            when  {
-                expression { return env.SKIP_PIPELINE != 'true' }
-            }
             parallel {
                 // Phân tích mã nguồn bằng SonarQube
                 stage('Scan Code SonarQube') {
