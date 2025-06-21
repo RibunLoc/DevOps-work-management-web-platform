@@ -9,7 +9,7 @@ pipeline {
     // Khai báo các biến môi trường cần thiết
     environment {
         SCANNER_HOME = tool 'sonar-scanner' // Đường dẫn đến SonarQube Scanner
-        SKIP_NOTIFY   = 'false' // không cho phép bất chấp báo email
+        SKIP_NOTIFY_FRRONTEND   = 'false' // không cho phép bất chấp báo email
     }
     // Khai báo các công cụ cần thiết cho pipeline
     tools {
@@ -40,7 +40,7 @@ pipeline {
                         // không làm gì cả và kết thúc pipeline
                         echo "Không có file cập nhật được push, Kết thúc Pipeliine"
                         currentBuild.result = 'SUCCESS'
-                        env.SKIP_NOTIFY   = 'true'
+                        env.SKIP_NOTIFY_FRRONTEND   = 'true'
                         error("Skip pipeline do không có thay đổi")
                         return
                     }
@@ -215,7 +215,7 @@ pipeline {
         always {
             archiveArtifacts artifacts: 'reports/**', fingerprint: true
             script {
-                if (env.SKIP_NOTIFY == 'true') {
+                if (env.SKIP_NOTIFY_FRRONTEND == 'true') {
                     echo "Bỏ qua email vì không có thay đổi!"
                     return
                 }
