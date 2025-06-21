@@ -41,9 +41,7 @@ pipeline {
                         echo "Không có file cập nhật được push, Kết thúc Pipeliine"
                         currentBuild.result = 'SUCCESS'
                         env.SKIP_NOTIFY   = 'true'
-                        catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
-                            error("Skip pipeline do không có thay đổi")
-                        }
+                        error("Skip pipeline do không có thay đổi")
                         return
                     }
 
