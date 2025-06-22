@@ -1,4 +1,5 @@
-FROM node:22-alpine
+# stage 1: Build
+FROM node:22-alpine AS builder 
 
 # Tạo user group
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
@@ -11,12 +12,26 @@ RUN chown -R appuser:appgroup /app
 USER appuser
 
 # Copy package files và cài đặt dependencies
-COPY --chown=appuser:appgroup package.json package-lock.json* ./
-RUN npm install
+COPY --chown=appuser:appgroup package*.json ./
+RUN npm ci
 
 # Copy source code
 COPY . .
-RUN npm run build 
+RUN npm run build
 
-EXPOSE 5173
-CMD ["npm", "run", "dev"]
+# stage 2: Server nginx
+FROM nginx:1.25-alpine
+
+# Copy nginx.conf và entrypoint 
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+
+# Cấp quyên thực thi
+RUN chmod +x /docker-entrypoint.sh
+
+# Copy build
+COPY --from=builder /app/dist/ /usr/share/nginx/html
+
+EXPOSE 80
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
