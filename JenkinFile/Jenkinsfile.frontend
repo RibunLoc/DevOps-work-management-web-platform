@@ -4,7 +4,7 @@ pipeline {
     parameters {
         string(name: 'TAG_NAME', defaultValue: 'v2.0', description: 'Đây là tag mà bạn muốn gán chi image Docker')
         string(name: 'NAME_DOCKER', defaultValue: 'ribun', description: 'Tên của docker mà bạn sử dụng để lưu trữ image')
-        string(name: 'NAME_IMAGE', defaultValue: 'taskmanagement_frontend', description: 'Tên của image Docker mà bạn muốn tạo')
+        string(name: 'NAME_IMAGE', defaultValue: 'taskmanagement_frontend_develop', description: 'Tên của image Docker mà bạn muốn tạo')
     }
     // Khai báo các biến môi trường cần thiết
     environment {
