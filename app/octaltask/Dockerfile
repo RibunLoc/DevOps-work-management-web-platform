@@ -22,6 +22,9 @@ RUN npm run build
 # stage 2: Server nginx
 FROM nginx:1.25-alpine
 
+# tạo thư mục chưa file runtime 
+RUN mkdir -p /usr/share/nginx/html
+
 # Copy nginx.conf và entrypoint 
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY docker-entrypoint.sh /docker-entrypoint.sh
