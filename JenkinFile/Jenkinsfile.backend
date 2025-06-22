@@ -27,7 +27,7 @@ pipeline {
     agent none
     // Cung cấp thông tin cần thiết cho pipeline
     parameters {
-        string(name: 'TAG_NAME', defaultValue: 'v1.0', description: 'Tag image Docker')
+        string(name: 'TAG_NAME', defaultValue: 'v3.0', description: 'Tag image Docker')
         string(name: 'NAME_DOCKER', defaultValue: 'ribun', description: 'Docker username hoặc registry repo')
     }
     // Khai báo các biến môi trường cần thiết
@@ -206,7 +206,7 @@ pipeline {
                     withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
                         buildServices("Đẩy Image lên repo ${params.NAME_DOCKER}", { svc ->
                             dir("app/octaltask-api/${svc}/"){
-                                def image = "${params.NAME_DOCKER}/task-management-${svc}:${env.NEW_TAG}"
+                                def image = "${params.NAME_DOCKER}/task-management-product-${svc}:${env.NEW_TAG}"
                                 echo "Bắt đầu quá trình đẩy image..."
                                 sh """
                                     docker tag ${svc} ${image}
@@ -250,7 +250,7 @@ pipeline {
                                 git remote set-url origin https://${GIT_USER}:${GIT_TOKEN}@github.com/RibunLoc/DevOps-task-management-gitops.git
                             """
                             buildServices("Cập nhật services", { svc ->
-                                def image     = "${params.NAME_DOCKER}/task-management-${svc}"
+                                def image     = "${params.NAME_DOCKER}/task-management-product-${svc}"
                                 def imageTag  = "${image}:${env.NEW_TAG}"
                                 echo "Thay tag cho image backend -> ${svc}"
 
