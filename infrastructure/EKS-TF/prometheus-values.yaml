@@ -38,6 +38,9 @@ grafana:
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
       alb.ingress.kubernetes.io/load-balancer-name: alb-ops
       alb.ingress.kubernetes.io/group.name: alb-ops-group
+      alb.ingress.kubernetes.io/healthcheck-path: "/api/health"
+      alb.ingress.kubernetes.io/healthcheck-port: "traffic-port"
+      alb.ingress.kubernetes.io/success-codes: "200"
     
   persistence:
     enabled: true
@@ -70,7 +73,7 @@ grafana:
 #       alb.ingress.kubernetes.io/load-balancer-name: "alb-alertmanager"
 #       alb.ingress.kubernetes.io/group.name: "alertmanager-alb-group"
 
-# -- RBAC (tùy chọn, thường nên bật)
+# -- RBAC
 rbacEnable: true
 
 # -- Node exporter
