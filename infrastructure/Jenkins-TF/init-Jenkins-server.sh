@@ -85,8 +85,8 @@ sudo apt install terraform -y
 sudo apt-get install wget gnupg
 wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
 echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
-sudo apt-get update
-sudo apt-get install trivy
+sudo apt-get update -y
+sudo apt-get install trivy -y
 
 
 # Ref - 
@@ -113,3 +113,8 @@ snyk --version
 # Ref - 
 # Installing jq
 sudo apt install jq -y
+
+# Ref - https://lindevs.com/install-yq-on-ubuntu
+# Installing yq 
+sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+sudo chmod a+x /usr/local/bin/yq

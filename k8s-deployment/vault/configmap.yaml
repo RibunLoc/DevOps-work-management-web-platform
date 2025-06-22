@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: vault-test
-data:
-  DB_PASSWORD: <path:secret/data/dev/app#DB_PASSWORD>
