@@ -20,12 +20,12 @@ resource "aws_eks_cluster" "eks-cluster" {
 
 
 data "aws_eks_cluster" "default" {
-  name = aws_eks_cluster.eks-cluster.name
+  name = aws_eks_cluster.eks-cluster.id
 }
 
 //
 data "aws_eks_cluster_auth" "default" {
-  name = aws_eks_cluster.eks-cluster.name
+  name = aws_eks_cluster.eks-cluster.id
 }
 
 provider "kubernetes" {
@@ -36,7 +36,7 @@ provider "kubernetes" {
     // https://kubernetes.io/docs/reference/access-authn-authz/authentication/#client-go-credential-plugins
     api_version = "client.authentication.k8s.io/v1beta1"
     command     = "aws"
-    args        = ["eks", "get-token", "--cluster-name", data.aws_eks_cluster.default.name]
+    args        = ["eks", "get-token", "--cluster-name", data.aws_eks_cluster.default.id]
   }
 }
 

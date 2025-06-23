@@ -10,7 +10,17 @@ async function bootstrap() {
     transform: true,
   }));
 
-  app.enableCors();
+  const allowedOrigins = ['https://netsena.io.vn', 'https://apidev.netsena.io.vn'];
+  app.enableCors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+  });
 
   const config = new DocumentBuilder()
     .setTitle('Octaltask API Documentation')
