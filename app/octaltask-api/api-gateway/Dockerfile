@@ -24,6 +24,8 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 
+# Đảm bảo quyền thư mục thuộc appuser
+RUN chown -R appuser:appgroup /app
 USER appuser
 
 EXPOSE 3000
