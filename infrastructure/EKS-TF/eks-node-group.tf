@@ -68,8 +68,8 @@ resource "aws_eks_node_group" "eks_node_group_backend" {
   subnet_ids = module.vpc.private_subnet_ids
 
   scaling_config {
-    desired_size = 2
-    max_size = 3
+    desired_size = 3
+    max_size = 4
     min_size = 1
   }
 
@@ -97,8 +97,8 @@ resource "aws_eks_node_group" "eks_node_group_frontend" {
   subnet_ids = module.vpc.private_subnet_ids
   
   scaling_config {
-      desired_size = 2
-      max_size = 3
+      desired_size = 3
+      max_size = 4
       min_size = 1
   }
 
