@@ -27,3 +27,4 @@ USER appuser
 
 EXPOSE 50051
 CMD ["node", "dist/main.js"]
+#
