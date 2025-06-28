@@ -1,3 +1,4 @@
+# Ref - https://github.com/sd031/three-tier-eks-iac/blob/main/terraform/helm-load-balancer-controller.tf
 resource "aws_iam_openid_connect_provider" "eks" {
   url = aws_eks_cluster.eks-cluster.identity[0].oidc[0].issuer
   client_id_list = ["sts.amazonaws.com"]

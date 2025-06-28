@@ -1,3 +1,4 @@
+# EKS service assume để tạo và quản lý cluster.
 resource "aws_iam_role" "EKSClusterRole" {
    name = "EKSClusterRole"
    assume_role_policy = jsonencode({
@@ -18,6 +19,7 @@ resource "aws_iam_role" "EKSClusterRole" {
    }
 }
 
+# Role cho các EC2 instance (worker node) trong EKS cluster sử dụng
 resource "aws_iam_role" "NodeGroupRole" {
   name = "EKSNodeGroupRole"
   assume_role_policy = jsonencode({
@@ -38,7 +40,7 @@ resource "aws_iam_role" "NodeGroupRole" {
   }
 }
 
-
+# Giúp IAM role có quyền truy xuất thông tin cluster để dùng để dùng CLI
 module "allow_eks_access_iam_policy" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-policy"
   version = "5.55.0"
@@ -59,6 +61,7 @@ module "allow_eks_access_iam_policy" {
   })
 }
 
+# Tạo iam role eks-admin-iam-role
 module "eks_admins_iam_role" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role"
   version = "5.55.0"
@@ -74,6 +77,7 @@ module "eks_admins_iam_role" {
   ]
 }
 
+# Tạo iam user user-1
 module "iam_iam-user" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-user"
   version = "5.55.0"
@@ -85,6 +89,7 @@ module "iam_iam-user" {
   force_destroy = true
 }
 
+# Tạo iam policy allow_assume_eks_admin_iam_policy
 module "allow_assume_eks_admin_iam_policy" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-policy"
   version = "5.55.0"
@@ -106,6 +111,7 @@ module "allow_assume_eks_admin_iam_policy" {
   })
 }
 
+# Tạo iam group eks-admin
 module "eks_admins_iam_group" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-group-with-policies"
   version = "5.55.0"
