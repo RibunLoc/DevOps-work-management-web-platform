@@ -91,4 +91,5 @@ terraform destroy --file=<file-configure.tfvars>
 ```
 
 ## Triển khai quy trình CI/CD
+![Pipeline CI/CD](/image/DevOps_Pipeline.gif)
 

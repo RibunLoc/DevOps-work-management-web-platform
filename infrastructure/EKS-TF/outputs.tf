@@ -22,14 +22,3 @@ output "cluster_security_group_id" {
   description = "ID của Security Group gắn với EKS Cluster"
   value       = module.eks_cluster_sg.security_group_id
 }
-
-# tuyệt đối không được commit file tfstate lên Github
-output "iam_user_access_key" {
-  value = module.iam_iam-user.iam_user_access_key_id
-  sensitive = true
-}
-
-output "iam_uer_access_key_secret" {
-  value = module.iam_iam-user.iam_user_access_key_secret
-  sensitive = true
-}

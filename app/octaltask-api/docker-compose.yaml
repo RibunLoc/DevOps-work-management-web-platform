@@ -5,27 +5,31 @@ services:
     #   args:
     #     SERVICE: api-gateway
     #     PORT: ${SERVER_PORT}
-    image: ribun/task-management-api-gateway:v1.0 #ribun/octaltask-backend-api-gateway:${TAG:-dev}
-    container_name: octaltask-backend-api-gateway
+    image: ribun/task-management-product-api-gateway:v3.0-20250624-152959
+    container_name: api-gateway
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     env_file:
       - .env
- 
+    networks:
+      - internal
+
   auth-service:
     # build:
     #   context: .
     #   args:
     #     SERVICE: auth-service
     #     PORT: ${AUTH_PORT}
-    image: ribun/task-management-auth-service:v1.0
-    container_name: octaltask-backend-auth-service
+    image: ribun/task-management-product-auth-service:v3.0-20250624-152959
+    container_name: auth-service
     ports:
       - "${AUTH_PORT}:${AUTH_PORT}"
     env_file:
       - .env
     depends_on:
       - api-gateway
+    networks:
+      - internal
 
   task-service:
     # build:
@@ -33,14 +37,16 @@ services:
     #   args:
     #     SERVICE: task-service
     #     PORT: ${TASK_PORT}
-    image: ribun/task-management-task-service:v1.0
-    container_name: octaltask-backend-task-service
+    image: ribun/task-management-product-task-service:v3.0-20250622-150302
+    container_name: task-service
     ports:
       - "${TASK_PORT}:${TASK_PORT}"
     env_file:
       - .env
     depends_on:
       - auth-service
+    networks:
+      - internal
     
   user-service:
     # build:
@@ -48,11 +54,15 @@ services:
     #   args:
     #     SERVICE: user-service
     #     PORT: ${USER_PORT}
-    image:  ribun/task-management-user-service:v1.0
-    container_name: octaltask-backend-user-service
+    image:  ribun/task-management-product-user-service:v3.0-20250622-150931
+    container_name: user-service
     ports:
       - "${USER_PORT}:${USER_PORT}"
     env_file:
       - .env
     depends_on:
       - api-gateway
+    networks:
+      - internal
+networks:
+  internal:
