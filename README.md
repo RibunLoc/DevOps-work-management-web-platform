@@ -1,5 +1,18 @@
 # DevOps-work-management-web-platform
 
+![Terraform](https://img.shields.io/badge/Terraform-IaC-623CE4?logo=terraform) ![AWS](https://img.shields.io/badge/AWS-EKS-orange?logo=amazon-aws) ![Kubernetes](https://img.shields.io/badge/Kubernetes-Production-blue?logo=kubernetes) ![Helm](https://img.shields.io/badge/Helm-Chart-0F1689?logo=helm) ![ArgoCD](https://img.shields.io/badge/ArgoCD-GitOps-critical?logo=argo) ![Jenkins](https://img.shields.io/badge/Jenkins-CI--Pipeline-red?logo=jenkins) ![Vault](https://img.shields.io/badge/Vault-Secrets-black?logo=hashicorp) ![Prometheus](https://img.shields.io/badge/Monitoring-Prometheus-orange?logo=prometheus) ![Grafana](https://img.shields.io/badge/Dashboard-Grafana-ff8800?logo=grafana) ![SonarQube](https://img.shields.io/badge/SonarQube-Code_Quality-blue?logo=sonarqube) ![Snyk](https://img.shields.io/badge/Snyk-Security-purple?logo=snyk) ![Trivy](https://img.shields.io/badge/Trivy-Vulnerability_Scan-yellow?logo=aqua) ![Docker](https://img.shields.io/badge/Docker-Container-lightblue?logo=docker)
+
+![Repo Size](https://img.shields.io/github/repo-size/RibunLoc/DevOps-task-management-web-platform)
+![Last Commit](https://img.shields.io/github/last-commit/RibunLoc/DevOps-task-management-web-platform)
+![Issues](https://img.shields.io/github/issues-raw/RibunLoc/DevOps-task-management-web-platform)
+
+![React](https://img.shields.io/badge/React-19.0.0-blue)
+![Vite](https://img.shields.io/badge/Vite-6.2.6-purple)
+![ESLint](https://img.shields.io/badge/ESLint-9.21.0-yellowgreen)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-5.7.2-red)
+
+
+
 ### 🧑‍💻 Công nghệ & Công cụ DevOps
 
 - **Terraform** – Triển khai Infrastructure as Code (IaC)
