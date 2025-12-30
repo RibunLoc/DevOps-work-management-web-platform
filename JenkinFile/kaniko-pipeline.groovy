@@ -20,9 +20,10 @@ spec:
         command: ["cat"]
         tty: true
       - name: kaniko
-        image: gcr.io/kaniko-project/executor:v1.23.2
-        command: ["/busybox/sh", "-c"]
-        args: ["sleep 365d"]
+        # Lưu ý: image `executor` (non-debug) thường không có shell/cat => Jenkins không exec `sh` được.
+        # Dùng `-debug` để có busybox (shell/cat) và giữ container sống bằng command + tty.
+        image: gcr.io/kaniko-project/executor:v1.23.2-debug
+        command: ["/busybox/cat"]
         tty: true
         volumeMounts:
           - name: docker-config
