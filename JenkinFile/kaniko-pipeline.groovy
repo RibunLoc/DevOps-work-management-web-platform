@@ -48,8 +48,8 @@ spec:
                 container('kaniko') {
                     sh '''
                       /kaniko/executor \
-                        --context=dir://$WORKSPACE \
-                        --dockerfile=$WORKSPACE/Dockerfile \
+                        --context=dir://$WORKSPACE/app/octaltask-api/api-gateway \
+                        --dockerfile=$WORKSPACE/app/octaltask-api/api-gateway/Dockerfile \
                         --destination=$IMAGE_REPO:latest \
                         --cache=true \
                         --cache-repo=$CACHE_REPO
